@@ -20,6 +20,26 @@ test("inserts, selects and restores an object through history", async ({ page })
   await expect(undo).toBeEnabled();
 });
 
+test("edits a text object through the structured property inspector", async ({ page }) => {
+  await page.getByRole("button", { name: "Text", exact: true }).click();
+  const inspector = page.getByRole("tabpanel", { name: /Selection/ });
+
+  await expect(inspector.getByText("Text", { exact: true }).first()).toBeVisible();
+  await expect(inspector.getByText("Transform", { exact: true })).toBeVisible();
+  await expect(inspector.getByText("Content", { exact: true }).first()).toBeVisible();
+  await expect(inspector.getByText("Appearance", { exact: true })).toBeVisible();
+  await expect(inspector.getByText("Typography", { exact: true })).toBeVisible();
+
+  const content = inspector.getByRole("textbox", { name: "Text", exact: true });
+  await content.fill("Shipping 24");
+  await expect(content).toHaveValue("Shipping 24");
+
+  const fontSize = inspector.getByRole("spinbutton", { name: /Font size/ });
+  await fontSize.fill("32");
+  await expect(fontSize).toHaveValue("32");
+  await expect(inspector.getByRole("button", { name: /Date \{dt\|YYYY-MM-DD\}/ })).toBeVisible();
+});
+
 test("opens the contextual inspector and its label settings", async ({ page }) => {
   const labelSettings = page.locator(".inspector-editor-trigger [data-dropdown-toggle]");
   await labelSettings.click();

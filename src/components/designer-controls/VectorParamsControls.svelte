@@ -8,81 +8,60 @@
     editRevision: number;
     valueUpdated: () => void;
   }
-
   let { selectedObject, editRevision, valueUpdated }: Props = $props();
-
   const roundRadiusChanged = (value: number) => {
-    const rect = selectedObject as fabric.Rect;
-    rect.set({
-      rx: value,
-      ry: value,
-    });
+    (selectedObject as fabric.Rect).set({ rx: value, ry: value });
     valueUpdated();
   };
-
   const strokeWidthChanged = (value: number) => {
     selectedObject.set({ strokeWidth: value });
     valueUpdated();
   };
-
   const fillChanged = (value: string) => {
     selectedObject.set({ fill: value });
     valueUpdated();
   };
 </script>
 
-<input type="hidden" value={editRevision}>
-
-{#if selectedObject instanceof fabric.Rect}
-  <div class="input-group flex-nowrap input-group-sm">
-    <span class="input-group-text" title={$tr("params.vector.round_radius")}>
-      <MdIcon icon="rounded_corner" />
-    </span>
-    <input
-      type="number"
-      min="0"
-      max={Math.min(selectedObject.width, selectedObject.height) / 2}
-      class="form-control"
-      value={selectedObject.rx}
-      oninput={(e) => roundRadiusChanged(e.currentTarget.valueAsNumber)} />
-  </div>
-{/if}
-
+<input type="hidden" value={editRevision} />
 {#if selectedObject instanceof fabric.Rect || selectedObject instanceof fabric.Circle || selectedObject instanceof fabric.Line || selectedObject instanceof fabric.Polyline}
-  <div class="input-group flex-nowrap input-group-sm">
-    <span class="input-group-text" title={$tr("params.vector.stroke_width")}>
-      <MdIcon icon="line_weight" />
-    </span>
-    <input
-      type="number"
-      min="1"
-      class="form-control"
-      value={selectedObject.strokeWidth}
-      oninput={(e) => strokeWidthChanged(e.currentTarget.valueAsNumber)} />
-  </div>
+  <section class="inspector-control-section">
+    <header class="inspector-control-heading">
+      <div><strong>{$tr("inspector.appearance")}</strong><span>{$tr("inspector.appearance.help")}</span></div>
+      <MdIcon icon="palette" />
+    </header>
+    <div class="inspector-field-grid {selectedObject instanceof fabric.Rect ? 'inspector-field-grid-2' : ''}">
+      {#if selectedObject instanceof fabric.Rect}
+        <label class="inspector-field"
+          ><span>{$tr("params.vector.round_radius")}</span>
+          <div class="inspector-value">
+            <input
+              type="number"
+              min="0"
+              max={Math.min(selectedObject.width, selectedObject.height) / 2}
+              value={selectedObject.rx}
+              oninput={(e) => roundRadiusChanged(e.currentTarget.valueAsNumber)} /><small>px</small>
+          </div></label>
+      {/if}
+      <label class="inspector-field"
+        ><span>{$tr("params.vector.stroke_width")}</span>
+        <div class="inspector-value">
+          <input
+            type="number"
+            min="1"
+            value={selectedObject.strokeWidth}
+            oninput={(e) => strokeWidthChanged(e.currentTarget.valueAsNumber)} /><small>px</small>
+        </div></label>
+    </div>
+    {#if selectedObject instanceof fabric.Rect || selectedObject instanceof fabric.Circle}
+      <label class="inspector-field"
+        ><span>{$tr("params.vector.fill")}</span><select
+          value={selectedObject.fill}
+          onchange={(e) => fillChanged(e.currentTarget.value)}
+          ><option value="transparent">{$tr("params.color.transparent")}</option><option value="white"
+            >{$tr("params.color.white")}</option
+          ><option value="black">{$tr("params.color.black")}</option></select
+        ></label>
+    {/if}
+  </section>
 {/if}
-
-{#if selectedObject instanceof fabric.Rect || selectedObject instanceof fabric.Circle}
-  <div class="input-group input-group-sm flex-nowrap fill">
-    <span class="input-group-text" title={$tr("params.vector.fill")}>
-      <MdIcon icon="format_color_fill" />
-    </span>
-    <select
-      class="form-select"
-      value={selectedObject.fill}
-      onchange={(e) => fillChanged(e.currentTarget.value)}>
-      <option value="transparent">{$tr("params.color.transparent")}</option>
-      <option value="white">{$tr("params.color.white")}</option>
-      <option value="black">{$tr("params.color.black")}</option>
-    </select>
-  </div>
-{/if}
-
-<style>
-  .input-group {
-    width: 7em;
-  }
-  .input-group.fill {
-    width: 12em;
-  }
-</style>

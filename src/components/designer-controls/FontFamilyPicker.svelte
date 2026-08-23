@@ -56,67 +56,88 @@
   });
 </script>
 
-<div class="input-group flex-nowrap input-group-sm font-family-picker">
-  <span class="input-group-text" title={$tr("params.text.font_family")}>
+<label class="inspector-field">
+  <span>{$tr("params.text.font_family")}</span>
+  <div class="font-family-picker">
     <MdIcon icon="text_format" />
-  </span>
+    <input type="text" data-ver={editRevision} {value} oninput={(e) => valueUpdated(e.currentTarget.value)} />
+    <div class="dropdown">
+      <button
+        class="font-menu-trigger dropdown-toggle"
+        type="button"
+        data-dropdown-toggle
+        aria-label={$tr("params.text.font_family.search")}><MdIcon icon="expand_more" /></button>
+      <div class="dropdown-menu">
+        <div class="px-3 py-1">
+          <input
+            type="text"
+            class="form-control form-control-sm"
+            placeholder={$tr("params.text.font_family.search")}
+            bind:value={searchString} />
+        </div>
 
-  <input
-    type="text"
-    class="form-control font-family-input"
-    data-ver={editRevision}
-    {value}
-    oninput={(e) => valueUpdated(e.currentTarget.value)} />
+        {#if userFontsFiltered.length > 0}
+          <h6 class="dropdown-header">{$tr("params.text.user_fonts")}</h6>
+          {#each userFontsFiltered as family (family)}
+            <button class="dropdown-item" style="font-family: {family}" type="button" onclick={() => fontClick(family)}>
+              {family}
+            </button>
+          {/each}
+        {/if}
 
-  <!-- svelte-ignore a11y_consider_explicit_label -->
-  <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-dropdown-toggle></button>
+        {#if systemFontsFiltered.length > 0}
+          <h6 class="dropdown-header">{$tr("params.text.system_fonts")}</h6>
+          {#each systemFontsFiltered as family (family)}
+            <button class="dropdown-item" style="font-family: {family}" type="button" onclick={() => fontClick(family)}>
+              {family}
+            </button>
+          {/each}
+        {/if}
 
-  <div class="dropdown-menu">
-    <div class="px-3 py-1">
-      <input
-        type="text"
-        class="form-control form-control-sm"
-        placeholder={$tr("params.text.font_family.search")}
-        bind:value={searchString} />
+        {#if fontQuerySupported}
+          <div class="dropdown-divider"></div>
+          <button class="dropdown-item load-system-fonts" type="button" onclick={getSystemFonts}>
+            <MdIcon icon="refresh" />
+            {$tr("params.text.fetch_fonts")}
+          </button>
+        {/if}
+      </div>
     </div>
-
-    {#if userFontsFiltered.length > 0}
-      <h6 class="dropdown-header">{$tr("params.text.user_fonts")}</h6>
-      {#each userFontsFiltered as family (family)}
-        <button class="dropdown-item" style="font-family: {family}" type="button" onclick={() => fontClick(family)}>
-          {family}
-        </button>
-      {/each}
-    {/if}
-
-    {#if systemFontsFiltered.length > 0}
-      <h6 class="dropdown-header">{$tr("params.text.system_fonts")}</h6>
-      {#each systemFontsFiltered as family (family)}
-        <button class="dropdown-item" style="font-family: {family}" type="button" onclick={() => fontClick(family)}>
-          {family}
-        </button>
-      {/each}
-    {/if}
-
-    {#if fontQuerySupported}
-      <div class="dropdown-divider"></div>
-      <button class="dropdown-item load-system-fonts" type="button" onclick={getSystemFonts}>
-        <MdIcon icon="refresh" />
-        {$tr("params.text.fetch_fonts")}
-      </button>
-    {/if}
+    <FontsMenu />
   </div>
-
-  <FontsMenu />
-</div>
+</label>
 
 <style>
   .font-family-picker {
-    width: unset;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    align-items: center;
+    min-height: 2.5rem;
+    border: 1px solid var(--input);
+    border-radius: 0.65rem;
+    background: color-mix(in oklch, var(--background) 72%, transparent);
   }
-
-  .font-family-input {
-    width: 14em;
+  .font-family-picker > :global(.mdi) {
+    margin-inline-start: 0.7rem;
+    color: var(--muted-foreground);
+  }
+  .font-family-picker input {
+    min-width: 0;
+    height: 2.35rem;
+    border: 0;
+    padding: 0 0.55rem;
+    color: var(--foreground);
+    background: transparent;
+  }
+  .font-menu-trigger {
+    width: 2.35rem;
+    height: 2.35rem;
+    border: 0;
+    color: var(--muted-foreground);
+    background: transparent;
+  }
+  .font-menu-trigger::after {
+    display: none;
   }
 
   .dropdown-menu {
@@ -125,6 +146,6 @@
   }
 
   .load-system-fonts {
-    color: var(--bs-primary);
+    color: var(--primary);
   }
 </style>

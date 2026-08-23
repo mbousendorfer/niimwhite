@@ -10,278 +10,197 @@
     editRevision: number;
     valueUpdated: () => void;
   }
-
   let { selectedText, editRevision, valueUpdated }: Props = $props();
-
-  let sizeMin: number = 1;
-  let sizeMax: number = 999;
-
-  const setXAlign = (align: fabric.TOriginX) => {
-    selectedText.set({ textAlign: align });
+  const sizeMin = 1;
+  const sizeMax = 999;
+  const setXAlign = (textAlign: fabric.TOriginX) => {
+    selectedText.set({ textAlign });
     valueUpdated();
   };
-
-  const setYAlign = (align: fabric.TOriginY) => {
-    // change object origin, but keep position
+  const setYAlign = (originY: fabric.TOriginY) => {
     const pos = selectedText.getPointByOrigin("left", "top");
-    selectedText.set({ originY: align });
+    selectedText.set({ originY });
     selectedText.setPositionByOrigin(pos, "left", "top");
     valueUpdated();
   };
-
   const toggleBold = () => {
-    if (selectedText.fontWeight === "bold") {
-      selectedText.fontWeight = "normal";
-    } else {
-      selectedText.fontWeight = "bold";
-    }
+    selectedText.set({ fontWeight: selectedText.fontWeight === "bold" ? "normal" : "bold" });
     valueUpdated();
   };
-
   const toggleItalic = () => {
-    if (selectedText.fontStyle === "italic") {
-      selectedText.fontStyle = "normal";
-    } else {
-      selectedText.fontStyle = "italic";
-    }
+    selectedText.set({ fontStyle: selectedText.fontStyle === "italic" ? "normal" : "italic" });
     valueUpdated();
   };
-
   const toggleFontAutoSize = () => {
-    if (selectedText instanceof TextboxExt) {
-      selectedText.set({ fontAutoSize: !selectedText.fontAutoSize });
-    }
+    if (selectedText instanceof TextboxExt) selectedText.set({ fontAutoSize: !selectedText.fontAutoSize });
     valueUpdated();
   };
-
-  const updateFontFamily = (v: string) => {
-    selectedText.set({ fontFamily: v });
+  const fontSizeChange = (value: number) => {
+    selectedText.set({ fontSize: isNaN(value) ? 1 : Math.min(Math.max(value, sizeMin), sizeMax) });
     valueUpdated();
   };
-
-  const fontSizeUp = () => {
-    let s = selectedText.fontSize;
-    selectedText.set({ fontSize: Math.min(s > 40 ? Math.round(s * 1.1) : s + 2, sizeMax) });
+  const lineHeightChange = (value: number) => {
+    selectedText.set({ lineHeight: isNaN(value) ? 1 : value });
     valueUpdated();
   };
-
-  const fontSizeDown = () => {
-    let s = selectedText.fontSize;
-    selectedText.set({ fontSize: Math.max(s > 40 ? Math.round(s * 0.9) : s - 2, sizeMin) });
-    valueUpdated();
-  };
-
-  const lineHeightChange = (v: number) => {
-    v = isNaN(v) ? 1 : v;
-    selectedText.set({ lineHeight: v });
-    valueUpdated();
-  };
-
-  const fontSizeChange = (v: number) => {
-    v = isNaN(v) ? 1 : Math.min(Math.max(v, sizeMin), sizeMax);
-    selectedText.set({ fontSize: v });
-    valueUpdated();
-  };
-
-  const fillChanged = (value: string) => {
-    selectedText.set({ fill: value });
-    valueUpdated();
-  };
-
   const splitChanged = (value: string) => {
     if (selectedText instanceof fabric.Textbox) {
       selectedText.set({ splitByGrapheme: value === "grapheme" });
       valueUpdated();
     }
   };
-
-  const backgroundColorChanged = (value: string) => {
-    selectedText.set({ backgroundColor: value });
+  const fillChanged = (fill: string) => {
+    selectedText.set({ fill });
     valueUpdated();
   };
-
-  const editInPopup = () => {
-    const text = prompt($tr("params.text.edit.title"), selectedText.text);
-    if (text !== null) {
-      selectedText.set({ text });
-      selectedText.isEditing = false;
-      valueUpdated();
-    }
+  const backgroundColorChanged = (backgroundColor: string) => {
+    selectedText.set({ backgroundColor });
+    valueUpdated();
   };
-
-
 </script>
 
-<!-- Fix component not updating when selectedText changes. I didn't find a better way to do this. -->
-<input type="hidden" value={editRevision}>
+<input type="hidden" value={editRevision} />
 
-<button
-  title={$tr("params.text.align.left")}
-  class="btn btn-sm {selectedText.textAlign === 'left' ? 'btn-secondary' : ''}"
-  onclick={() => setXAlign("left")}><MdIcon icon="format_align_left" /></button>
-<button
-  title={$tr("params.text.align.center")}
-  class="btn btn-sm {selectedText.textAlign === 'center' ? 'btn-secondary' : ''}"
-  onclick={() => setXAlign("center")}><MdIcon icon="format_align_center" /></button>
-<button
-  title={$tr("params.text.align.right")}
-  class="btn btn-sm {selectedText.textAlign === 'right' ? 'btn-secondary' : ''}"
-  onclick={() => setXAlign("right")}><MdIcon icon="format_align_right" /></button>
-<div class="dropdown">
-  <button class="btn btn-sm dropdown-toggle" type="button" data-dropdown-toggle title={$tr("params.text.vorigin")}>
-    {#if selectedText.originY === "top"}
-      <MdIcon icon="vertical_align_top" />
-    {:else if selectedText.originY === "center"}
-      <MdIcon icon="vertical_align_center" />
-    {:else if selectedText.originY === "bottom"}
-      <MdIcon icon="vertical_align_bottom" />
-    {/if}
-  </button>
-  <div class="dropdown-menu p-2">
-    <button
-      class="btn btn-sm {selectedText.originY === 'top' ? 'btn-secondary' : ''}"
-      onclick={() => setYAlign("top")}
-      title={$tr("params.text.vorigin.top")}>
-      <MdIcon icon="vertical_align_top" />
-    </button>
-    <button
-      class="btn btn-sm {selectedText.originY === 'center' ? 'btn-secondary' : ''}"
-      onclick={() => setYAlign("center")}
-      title={$tr("params.text.vorigin.center")}>
-      <MdIcon icon="vertical_align_center" />
-    </button>
-    <button
-      class="btn btn-sm {selectedText.originY === 'bottom' ? 'btn-secondary' : ''}"
-      onclick={() => setYAlign("bottom")}
-      title={$tr("params.text.vorigin.bottom")}>
-      <MdIcon icon="vertical_align_bottom" />
-    </button>
-  </div>
-</div>
+<section class="inspector-control-section">
+  <header class="inspector-control-heading">
+    <div><strong>{$tr("inspector.content")}</strong><span>{$tr("inspector.content.help")}</span></div>
+    <MdIcon icon="edit_note" />
+  </header>
+  <label class="inspector-field"
+    ><span>{$tr("inspector.text")}</span><textarea
+      rows="3"
+      value={selectedText.text}
+      oninput={(e) => {
+        selectedText.set({ text: e.currentTarget.value });
+        valueUpdated();
+      }}></textarea
+    ></label>
+</section>
 
-<button
-  class="btn btn-sm {selectedText.fontWeight === 'bold' ? 'btn-secondary' : ''}"
-  title={$tr("params.text.bold")}
-  onclick={toggleBold}>
-  <MdIcon icon="format_bold" />
-</button>
-
-<button
-  class="btn btn-sm {selectedText.fontStyle === 'italic' ? 'btn-secondary' : ''}"
-  title={$tr("params.text.italic")}
-  onclick={toggleItalic}>
-  <MdIcon icon="format_italic" />
-</button>
-
-<div class="dropdown">
-  <button class="btn btn-sm dropdown-toggle" type="button" data-dropdown-toggle title={$tr("params.color")}>
-    <MdIcon icon="format_color_fill" />
-  </button>
-
-  <div class="dropdown-menu arrangement p-2">
-    <div class="input-group input-group-sm flex-nowrap color pb-2">
-      <span class="input-group-text">
-        <MdIcon icon="format_color_text" />
-      </span>
-      <select class="form-select" value={selectedText.fill} onchange={(e) => fillChanged(e.currentTarget.value)}>
-        <option value="white">{$tr("params.color.white")}</option>
-        <option value="black">{$tr("params.color.black")}</option>
-      </select>
-    </div>
-    <div class="input-group input-group-sm flex-nowrap color pb-2">
-      <span class="input-group-text">
-        <MdIcon icon="format_color_fill" />
-      </span>
-      <select
-        class="form-select"
+<section class="inspector-control-section">
+  <header class="inspector-control-heading">
+    <div><strong>{$tr("inspector.appearance")}</strong><span>{$tr("inspector.appearance.help")}</span></div>
+    <MdIcon icon="palette" />
+  </header>
+  <div class="inspector-field-grid inspector-field-grid-2">
+    <label class="inspector-field"
+      ><span>{$tr("inspector.text_color")}</span><select
+        value={selectedText.fill}
+        onchange={(e) => fillChanged(e.currentTarget.value)}
+        ><option value="white">{$tr("params.color.white")}</option><option value="black"
+          >{$tr("params.color.black")}</option
+        ></select
+      ></label>
+    <label class="inspector-field"
+      ><span>{$tr("inspector.background")}</span><select
         value={selectedText.backgroundColor || "transparent"}
-        onchange={(e) => backgroundColorChanged(e.currentTarget.value)}>
-        <option value="white">{$tr("params.color.white")}</option>
-        <option value="black">{$tr("params.color.black")}</option>
-        <option value="transparent">{$tr("params.color.transparent")}</option>
-      </select>
+        onchange={(e) => backgroundColorChanged(e.currentTarget.value)}
+        ><option value="transparent">{$tr("params.color.transparent")}</option><option value="white"
+          >{$tr("params.color.white")}</option
+        ><option value="black">{$tr("params.color.black")}</option></select
+      ></label>
+  </div>
+</section>
+
+<section class="inspector-control-section">
+  <header class="inspector-control-heading">
+    <div><strong>{$tr("inspector.typography")}</strong><span>{$tr("inspector.typography.help")}</span></div>
+    <MdIcon icon="text_fields" />
+  </header>
+  <FontFamilyPicker
+    {editRevision}
+    value={selectedText.fontFamily}
+    valueUpdated={(fontFamily) => {
+      selectedText.set({ fontFamily });
+      valueUpdated();
+    }} />
+  <div class="inspector-field-grid inspector-field-grid-2">
+    <label class="inspector-field"
+      ><span>{$tr("params.text.font_size")}</span>
+      <div class="inspector-value">
+        <input
+          type="number"
+          min={sizeMin}
+          max={sizeMax}
+          step="2"
+          value={selectedText.fontSize}
+          oninput={(e) => fontSizeChange(e.currentTarget.valueAsNumber)} /><small>px</small>
+      </div></label>
+    <label class="inspector-field"
+      ><span>{$tr("params.text.line_height")}</span><input
+        type="number"
+        min="0.1"
+        step="0.1"
+        max="10"
+        value={selectedText.lineHeight}
+        oninput={(e) => lineHeightChange(e.currentTarget.valueAsNumber)} /></label>
+  </div>
+  <div class="inspector-subgroup">
+    <div class="inspector-subgroup-title">{$tr("inspector.style")}</div>
+    <div class="inspector-segmented inspector-segmented-2">
+      <button
+        class:active={selectedText.fontWeight === "bold"}
+        aria-pressed={selectedText.fontWeight === "bold"}
+        onclick={toggleBold}><MdIcon icon="format_bold" /><span>{$tr("params.text.bold")}</span></button>
+      <button
+        class:active={selectedText.fontStyle === "italic"}
+        aria-pressed={selectedText.fontStyle === "italic"}
+        onclick={toggleItalic}><MdIcon icon="format_italic" /><span>{$tr("params.text.italic")}</span></button>
     </div>
   </div>
-</div>
-
-{#if selectedText instanceof fabric.Textbox}
-  <div class="dropdown">
-    <button class="btn btn-sm dropdown-toggle" type="button" data-dropdown-toggle title={$tr("params.params.text.split")}>
-      <MdIcon icon="wrap_text" />
-    </button>
-
-    <div class="dropdown-menu arrangement p-2">
-      <div class="input-group input-group-sm flex-nowrap split pb-2">
-        <select class="form-select" value={selectedText.splitByGrapheme ? "grapheme" : "space"} onchange={(e) => splitChanged(e.currentTarget.value)}>
-          <option value="space">{$tr("params.params.text.split.spaces")}</option>
-          <option value="grapheme">{$tr("params.params.text.split.grapheme")}</option>
-        </select>
-      </div>
+  <div class="inspector-subgroup">
+    <div class="inspector-subgroup-title">{$tr("inspector.alignment")}</div>
+    <div class="inspector-segmented inspector-segmented-3">
+      <button
+        class:active={selectedText.textAlign === "left"}
+        aria-label={$tr("params.text.align.left")}
+        aria-pressed={selectedText.textAlign === "left"}
+        onclick={() => setXAlign("left")}><MdIcon icon="format_align_left" /></button>
+      <button
+        class:active={selectedText.textAlign === "center"}
+        aria-label={$tr("params.text.align.center")}
+        aria-pressed={selectedText.textAlign === "center"}
+        onclick={() => setXAlign("center")}><MdIcon icon="format_align_center" /></button>
+      <button
+        class:active={selectedText.textAlign === "right"}
+        aria-label={$tr("params.text.align.right")}
+        aria-pressed={selectedText.textAlign === "right"}
+        onclick={() => setXAlign("right")}><MdIcon icon="format_align_right" /></button>
     </div>
   </div>
-{/if}
-
-{#if selectedText instanceof TextboxExt}
-  <!-- fixme: Custom property not auto-rendered for some reason -->
-  <button
-    class="btn btn-sm {selectedText.fontAutoSize ? 'btn-secondary' : ''}"
-    title={$tr("params.text.autosize")}
-    data-ver={editRevision}
-    onclick={toggleFontAutoSize}>
-    <MdIcon icon="expand" class="r-90" />
-  </button>
-{/if}
-
-
-<div class="input-group flex-nowrap input-group-sm font-size">
-  <span class="input-group-text" title={$tr("params.text.font_size")}><MdIcon icon="format_size" /></span>
-  <input
-    type="number"
-    min={sizeMin}
-    max={sizeMax}
-    step="2"
-    class="form-control"
-    value={selectedText.fontSize}
-    oninput={(e) => fontSizeChange(e.currentTarget.valueAsNumber)} />
-  <button class="btn btn-secondary" title={$tr("params.text.font_size.up")} onclick={fontSizeUp}>
-    <MdIcon icon="text_increase" />
-  </button>
-  <button class="btn btn-secondary" title={$tr("params.text.font_size.down")} onclick={fontSizeDown}>
-    <MdIcon icon="text_decrease" />
-  </button>
-</div>
-
-<div class="input-group flex-nowrap input-group-sm">
-  <span class="input-group-text" title={$tr("params.text.line_height")}>
-    <MdIcon icon="density_medium" />
-  </span>
-  <input
-    type="number"
-    min="0.1"
-    step="0.1"
-    max="10"
-    class="form-control"
-    value={selectedText.lineHeight}
-    oninput={(e) => lineHeightChange(e.currentTarget.valueAsNumber)} />
-</div>
-
-<FontFamilyPicker {editRevision} value={selectedText.fontFamily} valueUpdated={updateFontFamily} />
-
-<button class="btn btn-sm btn-secondary" onclick={editInPopup} title={$tr("params.text.edit")}>
-  <MdIcon icon="edit" />
-</button>
-
-<style>
-  .input-group {
-    width: 7em;
-  }
-  .font-size {
-    width: 12em;
-  }
-  .input-group.color {
-    width: 12em;
-  }
-  .input-group.split {
-    width: 14em;
-  }
-</style>
+  <div class="inspector-subgroup">
+    <div class="inspector-subgroup-title">{$tr("params.text.vorigin")}</div>
+    <div class="inspector-segmented inspector-segmented-3">
+      <button
+        class:active={selectedText.originY === "top"}
+        aria-pressed={selectedText.originY === "top"}
+        onclick={() => setYAlign("top")}><span>{$tr("params.text.vorigin.top")}</span></button>
+      <button
+        class:active={selectedText.originY === "center"}
+        aria-pressed={selectedText.originY === "center"}
+        onclick={() => setYAlign("center")}><span>{$tr("params.text.vorigin.center")}</span></button>
+      <button
+        class:active={selectedText.originY === "bottom"}
+        aria-pressed={selectedText.originY === "bottom"}
+        onclick={() => setYAlign("bottom")}><span>{$tr("params.text.vorigin.bottom")}</span></button>
+    </div>
+  </div>
+  {#if selectedText instanceof fabric.Textbox}
+    <label class="inspector-field"
+      ><span>{$tr("params.params.text.split")}</span><select
+        value={selectedText.splitByGrapheme ? "grapheme" : "space"}
+        onchange={(e) => splitChanged(e.currentTarget.value)}
+        ><option value="space">{$tr("params.params.text.split.spaces")}</option><option value="grapheme"
+          >{$tr("params.params.text.split.grapheme")}</option
+        ></select
+      ></label>
+  {/if}
+  {#if selectedText instanceof TextboxExt}
+    <label class="inspector-switch-row"
+      ><span><strong>{$tr("params.text.autosize")}</strong><small>{$tr("inspector.autosize.help")}</small></span><input
+        type="checkbox"
+        role="switch"
+        checked={selectedText.fontAutoSize}
+        onchange={toggleFontAutoSize} /></label>
+  {/if}
+</section>
