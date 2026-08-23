@@ -35,7 +35,8 @@
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.39.4",
-		"@fontsource-variable/geist": "^5.3.0",
+		"@fontsource-variable/azeret-mono": "^5.3.0",
+		"@fontsource-variable/instrument-sans": "^5.3.0",
 		"@lucide/svelte": "^1.33.0",
 		"@sveltejs/vite-plugin-svelte": "^6.2.4",
 		"@tailwindcss/vite": "^4.3.3",
