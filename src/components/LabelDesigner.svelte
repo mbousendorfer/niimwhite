@@ -38,6 +38,24 @@
   import { CustomCanvas } from "$/fabric-object/custom_canvas";
   import VectorParamsControls from "$/components/designer-controls/VectorParamsControls.svelte";
   import { CanvasUtils } from "$/utils/canvas_utils";
+  import BarcodeIcon from "@lucide/svelte/icons/barcode";
+  import CircleIcon from "@lucide/svelte/icons/circle";
+  import EyeIcon from "@lucide/svelte/icons/eye";
+  import Grid3X3Icon from "@lucide/svelte/icons/grid-3x3";
+  import ImageIcon from "@lucide/svelte/icons/image";
+  import MinusIcon from "@lucide/svelte/icons/minus";
+  import PrinterIcon from "@lucide/svelte/icons/printer";
+  import QrCodeIcon from "@lucide/svelte/icons/qr-code";
+  import Redo2Icon from "@lucide/svelte/icons/redo-2";
+  import ScanLineIcon from "@lucide/svelte/icons/scan-line";
+  import SquareIcon from "@lucide/svelte/icons/square";
+  import Trash2Icon from "@lucide/svelte/icons/trash-2";
+  import TypeIcon from "@lucide/svelte/icons/type";
+  import Undo2Icon from "@lucide/svelte/icons/undo-2";
+  import { Button } from "$/components/ui/button/index.js";
+  import { Separator } from "$/components/ui/separator/index.js";
+  import * as Tooltip from "$/components/ui/tooltip/index.js";
+  import StudioToolButton from "$/components/basic/StudioToolButton.svelte";
 
   let htmlCanvas: HTMLCanvasElement;
 
@@ -472,123 +490,118 @@
 
 <svelte:window bind:innerWidth={windowWidth} onkeydown={onKeyDown} onpaste={onPaste} />
 
-<div class="image-editor">
-  <div class="row mb-3">
-    <div class="col d-flex justify-content-center">
-      <div class="canvas-wrapper print-start-{labelProps.printDirection}">
-        <canvas bind:this={htmlCanvas}></canvas>
-      </div>
-    </div>
-  </div>
-
-  <div class="row mb-1">
-    <div class="col d-flex justify-content-center">
-      <div class="toolbar d-flex flex-wrap gap-1 justify-content-center align-items-center">
-        <LabelPropsEditor {labelProps} onChange={onUpdateLabelProps} />
-
-        <button class="btn btn-sm btn-secondary" onclick={clearCanvas} title={$tr("editor.clear")}>
-          <MdIcon icon="cancel_presentation" />
-        </button>
-
-        <SavedLabelsMenu
-          canvas={fabricCanvas!}
-          onRequestLabelTemplate={exportCurrentLabel}
-          {onLoadRequested}
-          {csvEnabled} />
-
-        <button
-          class="btn btn-sm btn-secondary"
-          disabled={undoState.undoDisabled}
-          onclick={() => undo.undo()}
-          title={$tr("editor.undo")}>
-          <MdIcon icon="undo" />
-        </button>
-
-        <button
-          class="btn btn-sm btn-secondary"
-          disabled={undoState.redoDisabled}
-          onclick={() => undo.redo()}
-          title={$tr("editor.redo")}>
-          <MdIcon icon="redo" />
-        </button>
-
-        <button
-          class="btn btn-sm {$appConfig.gridEnabled ? 'btn-primary' : 'btn-secondary'}"
-          onclick={toggleGrid}
-          title={$tr("editor.grid")}>
-          <MdIcon icon="grid_on" />
-        </button>
-
-        <button
-          class="btn btn-sm btn-secondary"
-          onclick={() => fabricCanvas?.resetVirtualZoom()}
-          title="Reset zoom">
-          {zoomText}
-        </button>
-
-        <CsvControl bind:enabled={csvEnabled} onPlaceholderPicked={onCsvPlaceholderPicked} />
-
+<Tooltip.Provider delayDuration={350}>
+  <div class="editor-workspace">
+    <aside class="tool-rail studio-surface" aria-label={$tr("editor.tools")}>
+      <span class="rail-label">{$tr("editor.add")}</span>
+      <StudioToolButton icon={TypeIcon} label={$tr("editor.objectpicker.text")} onclick={() => onObjectPicked("text")} />
+      <StudioToolButton icon={ImageIcon} label={$tr("editor.objectpicker.image")} onclick={() => onObjectPicked("image")} />
+      <StudioToolButton icon={SquareIcon} label={$tr("editor.objectpicker.rectangle")} onclick={() => onObjectPicked("rectangle")} />
+      <StudioToolButton icon={CircleIcon} label={$tr("editor.objectpicker.circle")} onclick={() => onObjectPicked("circle")} />
+      <StudioToolButton icon={MinusIcon} label={$tr("editor.objectpicker.line")} onclick={() => onObjectPicked("line")} />
+      <Separator class="my-1 w-7" />
+      <StudioToolButton icon={QrCodeIcon} label={$tr("editor.objectpicker.qrcode")} onclick={() => onObjectPicked("qrcode")} />
+      <StudioToolButton icon={BarcodeIcon} label={$tr("editor.objectpicker.barcode")} onclick={() => onObjectPicked("barcode")} />
+      <StudioToolButton icon={ScanLineIcon} label={$tr("editor.objectpicker.aruco")} onclick={() => onObjectPicked("aruco")} />
+      <Separator class="my-1 w-7" />
+      <div class="legacy-rail-control" title={$tr("editor.iconpicker.title")}>
         <IconPicker onSubmit={onIconPicked} onSubmitSvg={onSvgIconPicked} />
-
-        <ObjectPicker onSubmit={onObjectPicked} {labelProps} {zplImageReady} {pdfImageReady}  />
-
-        <button class="btn btn-sm btn-primary ms-1" onclick={openPreview}>
-          <MdIcon icon="visibility" />
-          {$tr("editor.preview")}
-        </button>
-        <button
-          title="Print with default or saved parameters"
-          class="btn btn-sm btn-primary ms-1"
-          onclick={openPreviewAndPrint}
-          disabled={$connectionState !== "connected"}><MdIcon icon="print" /> {$tr("editor.print")}</button>
       </div>
-    </div>
-  </div>
+      <div class="legacy-rail-control" title={$tr("editor.objectpicker.title")}>
+        <ObjectPicker onSubmit={onObjectPicked} {labelProps} {zplImageReady} {pdfImageReady} />
+      </div>
+    </aside>
 
-  <div class="row mb-1">
-    <div class="col d-flex justify-content-center">
-      <div class="toolbar d-flex flex-wrap gap-1 justify-content-center align-items-center">
+    <section class="canvas-panel studio-surface">
+      <header class="canvas-toolbar">
+        <div class="toolbar-group document-actions">
+          <LabelPropsEditor {labelProps} onChange={onUpdateLabelProps} />
+          <SavedLabelsMenu
+            canvas={fabricCanvas!}
+            onRequestLabelTemplate={exportCurrentLabel}
+            {onLoadRequested}
+            {csvEnabled} />
+          <CsvControl bind:enabled={csvEnabled} onPlaceholderPicked={onCsvPlaceholderPicked} />
+          <Button variant="ghost" size="icon-sm" onclick={clearCanvas} aria-label={$tr("editor.clear")}>
+            <Trash2Icon />
+          </Button>
+        </div>
+
+        <div class="toolbar-group history-actions">
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            disabled={undoState.undoDisabled}
+            onclick={() => undo.undo()}
+            aria-label={$tr("editor.undo")}>
+            <Undo2Icon />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            disabled={undoState.redoDisabled}
+            onclick={() => undo.redo()}
+            aria-label={$tr("editor.redo")}>
+            <Redo2Icon />
+          </Button>
+          <Button
+            variant={$appConfig.gridEnabled ? "secondary" : "ghost"}
+            size="icon-sm"
+            onclick={toggleGrid}
+            aria-label={$tr("editor.grid")}>
+            <Grid3X3Icon />
+          </Button>
+          <Button variant="ghost" size="sm" class="metric" onclick={() => fabricCanvas?.resetVirtualZoom()}>
+            {zoomText}
+          </Button>
+        </div>
+
+        <div class="toolbar-group print-actions">
+          <Button variant="outline" size="sm" onclick={openPreview}>
+            <EyeIcon data-icon="inline-start" />
+            {$tr("editor.preview")}
+          </Button>
+          <Button size="sm" onclick={openPreviewAndPrint} disabled={$connectionState !== "connected"}>
+            <PrinterIcon data-icon="inline-start" />
+            {$tr("editor.print")}
+          </Button>
+        </div>
+      </header>
+
+      <div class="canvas-stage studio-grid">
+        <div class="canvas-glow" aria-hidden="true"></div>
+        <div class="canvas-wrapper print-start-{labelProps.printDirection}">
+          <canvas bind:this={htmlCanvas}></canvas>
+        </div>
+      </div>
+
+      <div class="selection-toolbar" class:is-empty={selectedCount === 0}>
         {#if selectedCount > 0}
-          <button class="btn btn-sm btn-danger me-1" onclick={deleteSelected} title={$tr("editor.delete")}>
-            <MdIcon icon="delete" />
-          </button>
-        {/if}
-
-        {#if selectedCount > 0}
-          <button class="btn btn-sm btn-secondary me-1" onclick={cloneSelected} title={$tr("editor.clone")}>
-            <MdIcon icon="content_copy" />
-          </button>
-        {/if}
-
-        {#if selectedObject && selectedCount === 1}
-          <GenericObjectParamsControls {selectedObject} {editRevision} valueUpdated={controlValueUpdated} />
-        {/if}
-
-        {#if selectedObject}
-          <VectorParamsControls {selectedObject} {editRevision} valueUpdated={controlValueUpdated} />
-        {/if}
-
-        {#if selectedObject instanceof fabric.IText}
-          <TextParamsControls selectedText={selectedObject} {editRevision} valueUpdated={controlValueUpdated} />
-        {/if}
-
-        {#if selectedObject instanceof QRCode}
-          <QrCodeParamsPanel selectedQRCode={selectedObject} {editRevision} valueUpdated={controlValueUpdated} />
-        {/if}
-
-        {#if selectedObject instanceof ArUcoMarker}
-          <ArUcoParamsPanel selectedArUco={selectedObject} {editRevision} valueUpdated={controlValueUpdated} />
-        {/if}
-
-        {#if selectedObject instanceof Barcode}
-          <BarcodeParamsPanel selectedBarcode={selectedObject} {editRevision} valueUpdated={controlValueUpdated} />
-        {/if}
-
-        {#if selectedObject instanceof fabric.IText || selectedObject instanceof QRCode || (selectedObject instanceof Barcode && selectedObject.encoding === "CODE128B")}
-          <VariableInsertControl {selectedObject} valueUpdated={controlValueUpdated} />
+          <span class="selection-count">{selectedCount} {$tr(selectedCount === 1 ? "editor.selected.one" : "editor.selected.many")}</span>
+          <Button variant="destructive" size="icon-sm" onclick={deleteSelected} aria-label={$tr("editor.delete")}><Trash2Icon /></Button>
+          <button class="btn btn-sm btn-secondary" onclick={cloneSelected} title={$tr("editor.clone")}><MdIcon icon="content_copy" /></button>
+          {#if selectedObject && selectedCount === 1}
+            <GenericObjectParamsControls {selectedObject} {editRevision} valueUpdated={controlValueUpdated} />
+          {/if}
+          {#if selectedObject}<VectorParamsControls {selectedObject} {editRevision} valueUpdated={controlValueUpdated} />{/if}
+          {#if selectedObject instanceof fabric.IText}<TextParamsControls selectedText={selectedObject} {editRevision} valueUpdated={controlValueUpdated} />{/if}
+          {#if selectedObject instanceof QRCode}<QrCodeParamsPanel selectedQRCode={selectedObject} {editRevision} valueUpdated={controlValueUpdated} />{/if}
+          {#if selectedObject instanceof ArUcoMarker}<ArUcoParamsPanel selectedArUco={selectedObject} {editRevision} valueUpdated={controlValueUpdated} />{/if}
+          {#if selectedObject instanceof Barcode}<BarcodeParamsPanel selectedBarcode={selectedObject} {editRevision} valueUpdated={controlValueUpdated} />{/if}
+          {#if selectedObject instanceof fabric.IText || selectedObject instanceof QRCode || (selectedObject instanceof Barcode && selectedObject.encoding === "CODE128B")}
+            <VariableInsertControl {selectedObject} valueUpdated={controlValueUpdated} />
+          {/if}
+        {:else}
+          <span class="selection-hint">{$tr("editor.selection_hint")}</span>
         {/if}
       </div>
-    </div>
+
+      <footer class="canvas-status">
+        <span class="status-ready"><span></span>{$tr("editor.ready")}</span>
+        <span class="metric">{labelProps.size.width} × {labelProps.size.height} PX</span>
+        <span class="metric">{$appConfig.gridEnabled ? $tr("editor.grid_on") : $tr("editor.grid_off")}</span>
+      </footer>
+    </section>
   </div>
 
   {#if previewOpened}
@@ -600,24 +613,144 @@
       {csvEnabled}
       csvData={$csvData.data} />
   {/if}
-</div>
+</Tooltip.Provider>
 
 <style>
+  .editor-workspace {
+    height: 100%;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: 3.75rem minmax(0, 1fr);
+    gap: 0.65rem;
+  }
+
+  .tool-rail {
+    display: flex;
+    min-height: 0;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.12rem;
+    padding: 0.65rem 0.35rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    animation: studio-enter 420ms cubic-bezier(.2,.8,.2,1) both;
+  }
+
+  .rail-label {
+    margin-bottom: 0.25rem;
+    color: var(--muted-foreground);
+    font: 600 0.52rem/1 var(--font-mono);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .legacy-rail-control :global(.btn) {
+    width: 2.25rem;
+    height: 2.25rem;
+    border: 0;
+    border-radius: 0.65rem;
+    background: transparent;
+  }
+
+  .canvas-panel {
+    min-width: 0;
+    min-height: 0;
+    display: grid;
+    grid-template-rows: auto minmax(12rem, 1fr) auto auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    animation: studio-enter 520ms 40ms cubic-bezier(.2,.8,.2,1) both;
+  }
+
+  .canvas-toolbar {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 3rem;
+    padding: 0.45rem 0.65rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .toolbar-group { display: flex; min-width: 0; align-items: center; gap: 0.25rem; }
+  .history-actions { justify-content: center; }
+  .print-actions { justify-content: flex-end; }
+
+  .canvas-stage {
+    position: relative;
+    min-width: 0;
+    min-height: 0;
+    display: grid;
+    place-items: center;
+    padding: clamp(1rem, 4vw, 3.5rem);
+    overflow: auto;
+    background-color: color-mix(in oklch, var(--background) 74%, black);
+  }
+
+  .canvas-glow {
+    position: absolute;
+    width: min(64vw, 54rem);
+    height: min(36vw, 28rem);
+    border-radius: 50%;
+    background: color-mix(in oklch, var(--info) 7%, transparent);
+    filter: blur(5rem);
+    pointer-events: none;
+  }
+
   .canvas-wrapper {
-    border: 1px solid rgba(0, 0, 0, 0.4);
-    background-color: rgba(60, 55, 63, 0.5);
+    position: relative;
+    border: 1px solid color-mix(in oklch, var(--paper-foreground) 18%, transparent);
+    border-radius: 0.25rem;
+    background: var(--paper);
+    box-shadow: 0 2rem 5rem rgb(0 0 0 / 0.42), 0 0 0 1px rgb(255 255 255 / 0.08);
     max-width: 100%;
-    max-height: 70vh;
+    max-height: 100%;
     overflow: auto;
   }
-  .canvas-wrapper.print-start-left {
-    border-left: 2px solid #ff4646;
-  }
-  .canvas-wrapper.print-start-top {
-    border-top: 2px solid #ff4646;
-  }
+
+  .canvas-wrapper.print-start-left { border-left: 3px solid var(--primary); }
+  .canvas-wrapper.print-start-top { border-top: 3px solid var(--primary); }
   .canvas-wrapper canvas {
     image-rendering: pixelated;
     display: block;
+  }
+
+  .selection-toolbar {
+    min-height: 2.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    padding: 0.4rem 0.65rem;
+    border-top: 1px solid var(--border);
+    overflow-x: auto;
+  }
+
+  .selection-toolbar.is-empty { min-height: 2.4rem; }
+  .selection-count { margin-right: 0.4rem; font-size: 0.72rem; font-weight: 620; }
+  .selection-hint { color: var(--muted-foreground); font-size: 0.72rem; }
+
+  .canvas-status {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    min-height: 1.75rem;
+    padding: 0 0.75rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .status-ready { display: inline-flex; align-items: center; gap: 0.4rem; margin-right: auto; color: var(--muted-foreground); font-size: 0.66rem; }
+  .status-ready span { width: 0.38rem; height: 0.38rem; border-radius: 50%; background: var(--success); box-shadow: 0 0 0.65rem var(--success); }
+
+  @keyframes studio-enter {
+    from { opacity: 0; transform: translateY(0.5rem); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 900px) {
+    .canvas-toolbar { grid-template-columns: 1fr auto; }
+    .history-actions { display: none; }
   }
 </style>
