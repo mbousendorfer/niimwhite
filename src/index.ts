@@ -1,3 +1,4 @@
+import "$/styles/style.css";
 import "$/styles/style.scss";
 import "@popperjs/core";
 import "toastify-js/src/toastify.css";
