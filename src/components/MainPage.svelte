@@ -24,7 +24,7 @@
 
 <div class="studio-shell">
   <header class="studio-header studio-surface">
-    <a class="brand" href="/" aria-label="NiimBlue Studio">
+    <a class="brand" href={import.meta.env.BASE_URL} aria-label="NiimBlue Studio">
       <span class="brand-mark" aria-hidden="true">
         <span></span><span></span><span></span>
       </span>
