@@ -226,4 +226,9 @@
   .advanced-actions { display: flex; flex-wrap: wrap; gap: 0.3rem; padding: 0.4rem 0; }
   :global(.spin) { animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 760px) {
+    .connector-label { display: none; }
+    :global(.transport-trigger) { width: 2rem; padding-inline: 0; }
+  }
 </style>

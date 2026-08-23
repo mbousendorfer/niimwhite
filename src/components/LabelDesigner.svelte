@@ -61,6 +61,7 @@
   import * as Empty from "$/components/ui/empty/index.js";
   import { ScrollArea } from "$/components/ui/scroll-area/index.js";
   import * as Tabs from "$/components/ui/tabs/index.js";
+  import * as Sheet from "$/components/ui/sheet/index.js";
 
   let htmlCanvas: HTMLCanvasElement;
 
@@ -565,6 +566,48 @@
         </div>
 
         <div class="toolbar-group print-actions">
+          <Sheet.Root>
+            <Sheet.Trigger>
+              {#snippet child({ props })}
+                <Button {...props} variant="ghost" size="icon-sm" class="mobile-inspector-trigger" aria-label={$tr("editor.inspector")}>
+                  <Settings2Icon />
+                </Button>
+              {/snippet}
+            </Sheet.Trigger>
+            <Sheet.Content side={windowWidth < 640 ? "bottom" : "right"} class="mobile-inspector-sheet">
+              <Sheet.Header>
+                <Sheet.Title>{$tr("editor.inspector")}</Sheet.Title>
+                <Sheet.Description>{selectedCount > 0 ? $tr("editor.selection") : $tr("editor.document")}</Sheet.Description>
+              </Sheet.Header>
+              <div class="mobile-inspector-content">
+                {#if selectedCount > 0}
+                  <div class="selection-buttons">
+                    <Button variant="outline" size="sm" onclick={cloneSelected}><MdIcon icon="content_copy" /> {$tr("editor.clone")}</Button>
+                    <Button variant="destructive" size="sm" onclick={deleteSelected}><Trash2Icon /> {$tr("editor.delete")}</Button>
+                  </div>
+                  <div class="inspector-controls">
+                    {#if selectedObject && selectedCount === 1}<GenericObjectParamsControls {selectedObject} {editRevision} valueUpdated={controlValueUpdated} />{/if}
+                    {#if selectedObject}<VectorParamsControls {selectedObject} {editRevision} valueUpdated={controlValueUpdated} />{/if}
+                    {#if selectedObject instanceof fabric.IText}<TextParamsControls selectedText={selectedObject} {editRevision} valueUpdated={controlValueUpdated} />{/if}
+                    {#if selectedObject instanceof QRCode}<QrCodeParamsPanel selectedQRCode={selectedObject} {editRevision} valueUpdated={controlValueUpdated} />{/if}
+                    {#if selectedObject instanceof ArUcoMarker}<ArUcoParamsPanel selectedArUco={selectedObject} {editRevision} valueUpdated={controlValueUpdated} />{/if}
+                    {#if selectedObject instanceof Barcode}<BarcodeParamsPanel selectedBarcode={selectedObject} {editRevision} valueUpdated={controlValueUpdated} />{/if}
+                  </div>
+                {:else}
+                  <div class="mobile-document-actions">
+                    <div class="mobile-label-summary">
+                      <span>{$tr("params.label.size")}</span><strong>{labelProps.size.width} × {labelProps.size.height} px</strong>
+                    </div>
+                    <div class="mobile-control-row">
+                      <LabelPropsEditor {labelProps} onChange={onUpdateLabelProps} />
+                      <SavedLabelsMenu canvas={fabricCanvas!} onRequestLabelTemplate={exportCurrentLabel} {onLoadRequested} {csvEnabled} />
+                      <CsvControl bind:enabled={csvEnabled} onPlaceholderPicked={onCsvPlaceholderPicked} />
+                    </div>
+                  </div>
+                {/if}
+              </div>
+            </Sheet.Content>
+          </Sheet.Root>
           <Button variant="outline" size="sm" onclick={openPreview}>
             <EyeIcon data-icon="inline-start" />
             {$tr("editor.preview")}
@@ -754,6 +797,13 @@
   .toolbar-group { display: flex; min-width: 0; align-items: center; gap: 0.25rem; }
   .history-actions { justify-content: center; }
   .print-actions { justify-content: flex-end; }
+  :global(.mobile-inspector-trigger) { display: none; }
+  :global(.mobile-inspector-sheet) { overflow-y: auto; }
+  .mobile-inspector-content { display: flex; min-height: 0; flex-direction: column; gap: 0.75rem; padding: 0 1rem 1rem; }
+  .mobile-document-actions { display: flex; flex-direction: column; gap: 0.8rem; }
+  .mobile-label-summary { display: flex; justify-content: space-between; padding: 0.75rem; border: 1px solid var(--border); border-radius: var(--radius-lg); color: var(--muted-foreground); }
+  .mobile-label-summary strong { color: var(--foreground); font-family: var(--font-mono); }
+  .mobile-control-row { display: flex; flex-wrap: wrap; gap: 0.35rem; }
 
   .canvas-stage {
     position: relative;
@@ -880,6 +930,36 @@
     .editor-workspace { grid-template-columns: 3.75rem minmax(0, 1fr); }
     .inspector-panel { display: none; }
     .canvas-toolbar { grid-template-columns: 1fr auto; }
-    .history-actions { display: none; }
+    .document-actions { display: none; }
+    :global(.mobile-inspector-trigger) { display: inline-flex; }
+  }
+
+  @media (max-width: 640px) {
+    .editor-workspace {
+      grid-template:
+        "canvas" minmax(0, 1fr)
+        "tools" 3.65rem / minmax(0, 1fr);
+      gap: 0.4rem;
+    }
+
+    .tool-rail {
+      grid-area: tools;
+      min-width: 0;
+      flex-direction: row;
+      justify-content: flex-start;
+      gap: 0.08rem;
+      padding: 0.3rem 0.4rem;
+      border-radius: var(--radius-lg);
+      overflow-x: auto;
+      overflow-y: hidden;
+    }
+
+    .canvas-panel { grid-area: canvas; border-radius: var(--radius-lg); }
+    .rail-label, .tool-rail :global([data-slot="separator"]) { display: none; }
+    .canvas-toolbar { min-height: 2.75rem; padding: 0.35rem 0.4rem; }
+    .canvas-stage { padding: 0.75rem; }
+    .canvas-status { gap: 0.55rem; padding-inline: 0.55rem; }
+    .status-ready { font-size: 0; }
+    :global(.mobile-inspector-sheet[data-side="bottom"]) { max-height: 78dvh; border-radius: var(--radius-xl) var(--radius-xl) 0 0; }
   }
 </style>

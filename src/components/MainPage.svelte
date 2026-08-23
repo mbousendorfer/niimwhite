@@ -191,10 +191,22 @@
 
   .build-meta a { color: var(--foreground); }
 
+  @media (max-width: 1100px) {
+    .studio-header { grid-template-columns: minmax(0, 1fr) auto; }
+    .header-center { display: none; }
+  }
+
   @media (max-width: 760px) {
     .studio-shell { grid-template-rows: 3.5rem 1px minmax(0, 1fr); }
     .studio-header { grid-template-columns: 1fr auto; padding-inline: 0.65rem; }
-    .header-center, .brand-edition { display: none; }
+    .brand-edition { display: none; }
     .studio-main { padding: 0.45rem; }
+  }
+
+  @media (max-width: 480px) {
+    .studio-header { gap: 0.35rem; padding-inline: 0.5rem; }
+    .brand { gap: 0.42rem; }
+    .brand-name { font-size: 0.92rem; }
+    .header-actions { gap: 0.08rem; }
   }
 </style>
