@@ -100,7 +100,7 @@
   });
 </script>
 
-<div class="printer-connector">
+<div class="printer-connector" aria-live="polite">
   {#if $connectionState === "connected"}
     <Popover.Root>
       <Popover.Trigger>

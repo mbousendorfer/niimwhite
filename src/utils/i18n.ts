@@ -23,7 +23,11 @@ export const locale = writable<SupportedLanguage>(
   (localStorage.getItem("locale") as SupportedLanguage) ?? guessBrowserLanguage(),
 );
 
-locale.subscribe((value: SupportedLanguage) => localStorage.setItem("locale", value));
+locale.subscribe((value: SupportedLanguage) => {
+  localStorage.setItem("locale", value);
+  document.documentElement.lang = value.replaceAll("_", "-");
+  document.documentElement.dir = value === "ar" ? "rtl" : "ltr";
+});
 
 export const tr = derived(locale, ($locale) => (key: TranslationKey) => {
   const result = langPack[$locale] ? langPack[$locale][key] : undefined;

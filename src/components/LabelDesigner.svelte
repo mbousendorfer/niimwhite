@@ -62,6 +62,7 @@
   import { ScrollArea } from "$/components/ui/scroll-area/index.js";
   import * as Tabs from "$/components/ui/tabs/index.js";
   import * as Sheet from "$/components/ui/sheet/index.js";
+  import * as AlertDialog from "$/components/ui/alert-dialog/index.js";
 
   let htmlCanvas: HTMLCanvasElement;
 
@@ -77,6 +78,7 @@
   let undoState = $state<UndoState>({ undoDisabled: false, redoDisabled: false });
   let zoomText = $state<string>("100%");
   let inspectorTab = $state<"label" | "selection">("label");
+  let clearConfirmOpen = $state<boolean>(false);
 
   const undo = new UndoRedo();
 
@@ -292,9 +294,10 @@
   };
 
   const clearCanvas = () => {
-    if (!confirm($tr("editor.clear.confirm"))) {
-      return;
-    }
+    clearConfirmOpen = true;
+  };
+
+  const clearCanvasConfirmed = () => {
     undo.push(fabricCanvas!, labelProps);
     fabricCanvas!.clear();
   };
@@ -531,7 +534,7 @@
             {onLoadRequested}
             {csvEnabled} />
           <CsvControl bind:enabled={csvEnabled} onPlaceholderPicked={onCsvPlaceholderPicked} />
-          <Button variant="ghost" size="icon-sm" onclick={clearCanvas} aria-label={$tr("editor.clear")}>
+          <Button variant="ghost" size="icon-sm" onclick={clearCanvas} aria-label={$tr("editor.clear")} title={$tr("editor.clear")}>
             <Trash2Icon />
           </Button>
         </div>
@@ -542,7 +545,9 @@
             size="icon-sm"
             disabled={undoState.undoDisabled}
             onclick={() => undo.undo()}
-            aria-label={$tr("editor.undo")}>
+            aria-label={$tr("editor.undo")}
+            aria-keyshortcuts="Control+Z Meta+Z"
+            title={`${$tr("editor.undo")} · ⌘Z`}>
             <Undo2Icon />
           </Button>
           <Button
@@ -550,17 +555,20 @@
             size="icon-sm"
             disabled={undoState.redoDisabled}
             onclick={() => undo.redo()}
-            aria-label={$tr("editor.redo")}>
+            aria-label={$tr("editor.redo")}
+            aria-keyshortcuts="Control+Shift+Z Meta+Shift+Z"
+            title={`${$tr("editor.redo")} · ⇧⌘Z`}>
             <Redo2Icon />
           </Button>
           <Button
             variant={$appConfig.gridEnabled ? "secondary" : "ghost"}
             size="icon-sm"
             onclick={toggleGrid}
-            aria-label={$tr("editor.grid")}>
+            aria-label={$tr("editor.grid")}
+            title={$tr("editor.grid")}>
             <Grid3X3Icon />
           </Button>
-          <Button variant="ghost" size="sm" class="metric" onclick={() => fabricCanvas?.resetVirtualZoom()}>
+          <Button variant="ghost" size="sm" class="metric" onclick={() => fabricCanvas?.resetVirtualZoom()} title={$tr("editor.zoom")}>
             {zoomText}
           </Button>
         </div>
@@ -569,7 +577,7 @@
           <Sheet.Root>
             <Sheet.Trigger>
               {#snippet child({ props })}
-                <Button {...props} variant="ghost" size="icon-sm" class="mobile-inspector-trigger" aria-label={$tr("editor.inspector")}>
+                <Button {...props} variant="ghost" size="icon-sm" class="mobile-inspector-trigger" aria-label={$tr("editor.inspector")} title={$tr("editor.inspector")}>
                   <Settings2Icon />
                 </Button>
               {/snippet}
@@ -619,7 +627,7 @@
         </div>
       </header>
 
-      <div class="canvas-stage studio-grid">
+      <div class="canvas-stage studio-grid" role="application" aria-label={$tr("editor.canvas_area")}>
         <div class="canvas-glow" aria-hidden="true"></div>
         <div class="canvas-wrapper print-start-{labelProps.printDirection}">
           <canvas bind:this={htmlCanvas}></canvas>
@@ -733,6 +741,19 @@
       {csvEnabled}
       csvData={$csvData.data} />
   {/if}
+
+  <AlertDialog.Root bind:open={clearConfirmOpen}>
+    <AlertDialog.Content>
+      <AlertDialog.Header>
+        <AlertDialog.Title>{$tr("editor.clear")}</AlertDialog.Title>
+        <AlertDialog.Description>{$tr("editor.clear.confirm")}</AlertDialog.Description>
+      </AlertDialog.Header>
+      <AlertDialog.Footer>
+        <AlertDialog.Cancel>{$tr("common.cancel")}</AlertDialog.Cancel>
+        <AlertDialog.Action variant="destructive" onclick={clearCanvasConfirmed}>{$tr("editor.clear")}</AlertDialog.Action>
+      </AlertDialog.Footer>
+    </AlertDialog.Content>
+  </AlertDialog.Root>
 </Tooltip.Provider>
 
 <style>
