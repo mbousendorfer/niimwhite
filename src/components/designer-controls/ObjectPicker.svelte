@@ -16,7 +16,12 @@
 </script>
 
 <div class="dropdown">
-  <button class="btn btn-sm btn-secondary" data-dropdown-toggle data-dropdown-auto-close="outside">
+  <button
+    class="btn btn-sm btn-secondary"
+    data-dropdown-toggle
+    data-dropdown-auto-close="outside"
+    aria-label={$tr("editor.objectpicker.title")}
+    title={$tr("editor.objectpicker.title")}>
     <MdIcon icon="format_shapes" />
     <MdIcon icon="add" />
   </button>

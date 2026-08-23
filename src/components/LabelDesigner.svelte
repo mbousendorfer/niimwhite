@@ -972,7 +972,12 @@
       border-radius: var(--radius-lg);
       overflow-x: auto;
       overflow-y: hidden;
+      overscroll-behavior-inline: contain;
+      scrollbar-width: none;
     }
+
+    .tool-rail::-webkit-scrollbar { display: none; }
+    .legacy-rail-control :global([data-dropdown-toggle] .mdi:last-child) { display: none; }
 
     .canvas-panel { grid-area: canvas; border-radius: var(--radius-lg); }
     .rail-label, .tool-rail :global([data-slot="separator"]) { display: none; }

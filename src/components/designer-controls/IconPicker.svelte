@@ -58,16 +58,21 @@
   };
 
   onMount(() => {
-    dropdown?.addEventListener("show.bs.dropdown", onShow);
+    dropdown?.addEventListener("studio:dropdown-show", onShow);
   });
 
   onDestroy(() => {
-    dropdown?.removeEventListener("show.bs.dropdown", onShow);
+    dropdown?.removeEventListener("studio:dropdown-show", onShow);
   });
 </script>
 
 <div class="dropdown" bind:this={dropdown}>
-  <button class="btn btn-sm btn-secondary" data-dropdown-toggle data-dropdown-auto-close="outside">
+  <button
+    class="btn btn-sm btn-secondary"
+    data-dropdown-toggle
+    data-dropdown-auto-close="outside"
+    aria-label={$tr("editor.iconpicker.title")}
+    title={$tr("editor.iconpicker.title")}>
     <MdIcon icon="emoji_emotions" />
     <MdIcon icon="add" />
   </button>

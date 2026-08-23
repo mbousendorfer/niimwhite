@@ -31,7 +31,7 @@ export default defineConfig(
       },
     },
     {
-      ignores: ["dist/", "capacitor/"],
+      ignores: ["dist/", "capacitor/", "standalone-apps/**/www/**", "test-results/**", "playwright-report/**"],
     },
     {
       rules: {
