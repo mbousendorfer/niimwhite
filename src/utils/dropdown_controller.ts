@@ -35,7 +35,6 @@ export const setupDropdownController = () => {
       if (!menu) return;
       const opening = !menu.classList.contains("show");
       closeDropdowns(menu);
-      if (opening) trigger.dispatchEvent(new CustomEvent("studio:dropdown-show", { bubbles: true }));
       menu.classList.toggle("show", opening);
       trigger.setAttribute("aria-expanded", String(opening));
       return;

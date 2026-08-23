@@ -1,11 +1,13 @@
 <script lang="ts">
-  import { onDestroy, onMount } from "svelte";
   import { tr } from "$/utils/i18n";
   import { iconCodepoints, type MaterialIcon } from "$/styles/mdi_icons";
   import MdIcon from "$/components/basic/MdIcon.svelte";
   import { appConfig, userIcons } from "$/stores";
   import { FileUtils } from "$/utils/file_utils";
   import { Toasts } from "$/utils/toasts";
+  import SmilePlusIcon from "@lucide/svelte/icons/smile-plus";
+  import { Button } from "$/components/ui/button/index.js";
+  import * as Popover from "$/components/ui/popover/index.js";
 
   interface Props {
     onSubmit: (i: MaterialIcon) => void;
@@ -17,7 +19,8 @@
   let iconNames = $state<MaterialIcon[]>([]);
   let search = $state<string>("");
   let deleteMode = $state<boolean>(false);
-  let dropdown: HTMLDivElement;
+  let open = $state<boolean>(false);
+  let windowWidth = $state<number>(1024);
 
   const onShow = () => {
     if (iconNames.length === 0) {
@@ -47,6 +50,7 @@
     }
 
     onSubmitSvg(data);
+    open = false;
   };
 
   const iconClicked = (i: MaterialIcon) => {
@@ -55,31 +59,41 @@
     }
 
     onSubmit(i);
+    open = false;
   };
 
-  onMount(() => {
-    dropdown?.addEventListener("studio:dropdown-show", onShow);
-  });
-
-  onDestroy(() => {
-    dropdown?.removeEventListener("studio:dropdown-show", onShow);
+  $effect(() => {
+    if (open) onShow();
   });
 </script>
 
-<div class="dropdown" bind:this={dropdown}>
-  <button
-    class="btn btn-sm btn-secondary"
-    data-dropdown-toggle
-    data-dropdown-auto-close="outside"
-    aria-label={$tr("editor.iconpicker.title")}
-    title={$tr("editor.iconpicker.title")}>
-    <MdIcon icon="emoji_emotions" />
-    <MdIcon icon="add" />
-  </button>
+<svelte:window bind:innerWidth={windowWidth} />
 
-  <div class="dropdown-menu">
-    <h6 class="dropdown-header">{$tr("editor.iconpicker.title")}</h6>
-    <div class="p-3">
+<Popover.Root bind:open>
+  <Popover.Trigger>
+    {#snippet child({ props })}
+      <Button
+        {...props}
+        variant="ghost"
+        size="icon-lg"
+        aria-label={$tr("editor.iconpicker.title")}
+        title={$tr("editor.iconpicker.title")}>
+        <SmilePlusIcon />
+      </Button>
+    {/snippet}
+  </Popover.Trigger>
+
+  <Popover.Content
+    side={windowWidth <= 640 ? "top" : "right"}
+    align={windowWidth <= 640 ? "end" : "start"}
+    sideOffset={10}
+    class="w-[min(28rem,calc(100vw-1rem))] max-h-[min(40rem,calc(100dvh-1rem))] gap-0 overflow-hidden p-0">
+    <Popover.Header class="border-b px-3 py-2.5">
+      <Popover.Title>{$tr("editor.iconpicker.title")}</Popover.Title>
+      <Popover.Description>{$tr("editor.iconpicker.search")}</Popover.Description>
+    </Popover.Header>
+
+    <div class="icon-picker-body">
       <input
         disabled={$appConfig.iconListMode === "user"}
         type="text"
@@ -139,17 +153,15 @@
         {$tr("editor.iconpicker.mdi_link_title")}
       </a>
     </div>
-  </div>
-</div>
+  </Popover.Content>
+</Popover.Root>
 
 <style>
-  .dropdown-menu {
-    width: 100vw;
-    max-width: 450px;
-  }
+  .icon-picker-body { min-height: 0; display: flex; flex-direction: column; padding: 0.75rem; }
   .icons {
-    max-height: 400px;
-    overflow-y: scroll;
+    min-height: 8rem;
+    max-height: min(25rem, calc(100dvh - 16rem));
+    overflow-y: auto;
   }
   .user-icon img {
     width: 24px;

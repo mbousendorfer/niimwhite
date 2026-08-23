@@ -29,6 +29,26 @@ test("opens the contextual inspector and its label settings", async ({ page }) =
   await expect(labelSettings).toBeFocused();
 });
 
+test("keeps advanced insertion popovers above the canvas", async ({ page }) => {
+  await page.getByRole("button", { name: "Add icon", exact: true }).click();
+  const iconPopover = page.locator('[data-slot="popover-content"]');
+  await expect(iconPopover.getByPlaceholder("Search")).toBeVisible();
+  await expect.poll(() => iconPopover.locator(".icons button").count()).toBeGreaterThan(100);
+
+  const iconBounds = await iconPopover.boundingBox();
+  expect(iconBounds).not.toBeNull();
+  expect(iconBounds!.x).toBeGreaterThanOrEqual(0);
+  expect(iconBounds!.x + iconBounds!.width).toBeLessThanOrEqual(1280);
+  await page.keyboard.press("Escape");
+
+  await page.getByRole("button", { name: "Add object", exact: true }).click();
+  const objectPopover = page.locator('[data-slot="popover-content"]');
+  await expect(objectPopover.getByText("Add object", { exact: true })).toBeVisible();
+  await objectPopover.getByRole("button", { name: /Rectangle/ }).click();
+  await expect(objectPopover).toBeHidden();
+  await expect(page.getByRole("tab", { name: /Selection/ })).toBeEnabled();
+});
+
 test("persists canvas display settings", async ({ page }) => {
   await page.getByRole("button", { name: "Grid", exact: true }).click();
   await expect(page.getByText("Grid on", { exact: true })).toBeVisible();
