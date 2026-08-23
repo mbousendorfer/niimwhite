@@ -56,6 +56,11 @@
   import { Separator } from "$/components/ui/separator/index.js";
   import * as Tooltip from "$/components/ui/tooltip/index.js";
   import StudioToolButton from "$/components/basic/StudioToolButton.svelte";
+  import MousePointer2Icon from "@lucide/svelte/icons/mouse-pointer-2";
+  import Settings2Icon from "@lucide/svelte/icons/settings-2";
+  import * as Empty from "$/components/ui/empty/index.js";
+  import { ScrollArea } from "$/components/ui/scroll-area/index.js";
+  import * as Tabs from "$/components/ui/tabs/index.js";
 
   let htmlCanvas: HTMLCanvasElement;
 
@@ -70,6 +75,7 @@
   let windowWidth = $state<number>(0);
   let undoState = $state<UndoState>({ undoDisabled: false, redoDisabled: false });
   let zoomText = $state<string>("100%");
+  let inspectorTab = $state<"label" | "selection">("label");
 
   const undo = new UndoRedo();
 
@@ -400,18 +406,21 @@
       selectedCount = e.selected?.length ?? 0;
       selectedObject = e.selected?.length === 1 ? e.selected[0] : undefined;
       editRevision++;
+      inspectorTab = "selection";
     });
 
     fabricCanvas.on("selection:updated", (e): void => {
       selectedCount = e.selected?.length ?? 0;
       selectedObject = e.selected?.length === 1 ? e.selected[0] : undefined;
       editRevision++;
+      inspectorTab = "selection";
     });
 
     fabricCanvas.on("selection:cleared", (): void => {
       selectedObject = undefined;
       selectedCount = 0;
       editRevision++;
+      inspectorTab = "label";
     });
 
     fabricCanvas.on("dragover", (e): void => {
@@ -515,7 +524,6 @@
     <section class="canvas-panel studio-surface">
       <header class="canvas-toolbar">
         <div class="toolbar-group document-actions">
-          <LabelPropsEditor {labelProps} onChange={onUpdateLabelProps} />
           <SavedLabelsMenu
             canvas={fabricCanvas!}
             onRequestLabelTemplate={exportCurrentLabel}
@@ -575,33 +583,102 @@
         </div>
       </div>
 
-      <div class="selection-toolbar" class:is-empty={selectedCount === 0}>
-        {#if selectedCount > 0}
-          <span class="selection-count">{selectedCount} {$tr(selectedCount === 1 ? "editor.selected.one" : "editor.selected.many")}</span>
-          <Button variant="destructive" size="icon-sm" onclick={deleteSelected} aria-label={$tr("editor.delete")}><Trash2Icon /></Button>
-          <button class="btn btn-sm btn-secondary" onclick={cloneSelected} title={$tr("editor.clone")}><MdIcon icon="content_copy" /></button>
-          {#if selectedObject && selectedCount === 1}
-            <GenericObjectParamsControls {selectedObject} {editRevision} valueUpdated={controlValueUpdated} />
-          {/if}
-          {#if selectedObject}<VectorParamsControls {selectedObject} {editRevision} valueUpdated={controlValueUpdated} />{/if}
-          {#if selectedObject instanceof fabric.IText}<TextParamsControls selectedText={selectedObject} {editRevision} valueUpdated={controlValueUpdated} />{/if}
-          {#if selectedObject instanceof QRCode}<QrCodeParamsPanel selectedQRCode={selectedObject} {editRevision} valueUpdated={controlValueUpdated} />{/if}
-          {#if selectedObject instanceof ArUcoMarker}<ArUcoParamsPanel selectedArUco={selectedObject} {editRevision} valueUpdated={controlValueUpdated} />{/if}
-          {#if selectedObject instanceof Barcode}<BarcodeParamsPanel selectedBarcode={selectedObject} {editRevision} valueUpdated={controlValueUpdated} />{/if}
-          {#if selectedObject instanceof fabric.IText || selectedObject instanceof QRCode || (selectedObject instanceof Barcode && selectedObject.encoding === "CODE128B")}
-            <VariableInsertControl {selectedObject} valueUpdated={controlValueUpdated} />
-          {/if}
-        {:else}
-          <span class="selection-hint">{$tr("editor.selection_hint")}</span>
-        {/if}
-      </div>
-
       <footer class="canvas-status">
         <span class="status-ready"><span></span>{$tr("editor.ready")}</span>
         <span class="metric">{labelProps.size.width} × {labelProps.size.height} PX</span>
         <span class="metric">{$appConfig.gridEnabled ? $tr("editor.grid_on") : $tr("editor.grid_off")}</span>
       </footer>
     </section>
+
+    <aside class="inspector-panel studio-surface" aria-label={$tr("editor.inspector")}>
+      <Tabs.Root bind:value={inspectorTab} class="inspector-tabs">
+        <div class="inspector-heading">
+          <div>
+            <span class="inspector-kicker">{$tr("editor.inspector")}</span>
+            <strong>{inspectorTab === "label" ? $tr("editor.document") : $tr("editor.selection")}</strong>
+          </div>
+          {#if inspectorTab === "label"}<Settings2Icon />{:else}<MousePointer2Icon />{/if}
+        </div>
+
+        <Tabs.List variant="line" class="inspector-tab-list">
+          <Tabs.Trigger value="label">{$tr("editor.document")}</Tabs.Trigger>
+          <Tabs.Trigger value="selection" disabled={selectedCount === 0}>
+            {$tr("editor.selection")}
+            {#if selectedCount > 0}<span class="selection-badge">{selectedCount}</span>{/if}
+          </Tabs.Trigger>
+        </Tabs.List>
+
+        <ScrollArea class="inspector-scroll">
+          <Tabs.Content value="label" class="inspector-content">
+            <section class="inspector-section">
+              <div class="section-heading">
+                <span>{$tr("params.label.menu_title")}</span>
+                <span class="metric">PX</span>
+              </div>
+              <div class="property-row"><span>{$tr("params.label.size")}</span><strong>{labelProps.size.width} × {labelProps.size.height}</strong></div>
+              <div class="property-row"><span>{$tr("params.label.direction")}</span><strong>{$tr(`params.label.direction.${labelProps.printDirection}`)}</strong></div>
+              <div class="property-row"><span>{$tr("params.label.shape")}</span><strong>{labelProps.shape ?? "rect"}</strong></div>
+              <div class="inspector-editor-trigger">
+                <LabelPropsEditor {labelProps} onChange={onUpdateLabelProps} />
+                <span>{$tr("editor.edit_label")}</span>
+              </div>
+            </section>
+
+            <section class="inspector-section">
+              <div class="section-heading"><span>{$tr("editor.canvas_view")}</span></div>
+              <button class="property-action" onclick={toggleGrid}>
+                <span>{$tr("editor.grid")}</span>
+                <span class:active-value={$appConfig.gridEnabled}>{$appConfig.gridEnabled ? $tr("editor.on") : $tr("editor.off")}</span>
+              </button>
+              <button class="property-action" onclick={() => fabricCanvas?.resetVirtualZoom()}>
+                <span>{$tr("editor.zoom")}</span><span class="metric">{zoomText}</span>
+              </button>
+            </section>
+          </Tabs.Content>
+
+          <Tabs.Content value="selection" class="inspector-content">
+            {#if selectedCount > 0}
+              <section class="selection-actions">
+                <div>
+                  <strong>{selectedCount}</strong>
+                  <span>{$tr(selectedCount === 1 ? "editor.selected.one" : "editor.selected.many")}</span>
+                </div>
+                <div class="selection-buttons">
+                  <Button variant="outline" size="sm" onclick={cloneSelected}>
+                    <MdIcon icon="content_copy" /> {$tr("editor.clone")}
+                  </Button>
+                  <Button variant="destructive" size="sm" onclick={deleteSelected}>
+                    <Trash2Icon /> {$tr("editor.delete")}
+                  </Button>
+                </div>
+              </section>
+
+              <div class="inspector-controls">
+                {#if selectedObject && selectedCount === 1}
+                  <GenericObjectParamsControls {selectedObject} {editRevision} valueUpdated={controlValueUpdated} />
+                {/if}
+                {#if selectedObject}<VectorParamsControls {selectedObject} {editRevision} valueUpdated={controlValueUpdated} />{/if}
+                {#if selectedObject instanceof fabric.IText}<TextParamsControls selectedText={selectedObject} {editRevision} valueUpdated={controlValueUpdated} />{/if}
+                {#if selectedObject instanceof QRCode}<QrCodeParamsPanel selectedQRCode={selectedObject} {editRevision} valueUpdated={controlValueUpdated} />{/if}
+                {#if selectedObject instanceof ArUcoMarker}<ArUcoParamsPanel selectedArUco={selectedObject} {editRevision} valueUpdated={controlValueUpdated} />{/if}
+                {#if selectedObject instanceof Barcode}<BarcodeParamsPanel selectedBarcode={selectedObject} {editRevision} valueUpdated={controlValueUpdated} />{/if}
+                {#if selectedObject instanceof fabric.IText || selectedObject instanceof QRCode || (selectedObject instanceof Barcode && selectedObject.encoding === "CODE128B")}
+                  <VariableInsertControl {selectedObject} valueUpdated={controlValueUpdated} />
+                {/if}
+              </div>
+            {:else}
+              <Empty.Root class="inspector-empty">
+                <Empty.Header>
+                  <Empty.Media variant="icon"><MousePointer2Icon /></Empty.Media>
+                  <Empty.Title>{$tr("editor.nothing_selected")}</Empty.Title>
+                  <Empty.Description>{$tr("editor.selection_hint")}</Empty.Description>
+                </Empty.Header>
+              </Empty.Root>
+            {/if}
+          </Tabs.Content>
+        </ScrollArea>
+      </Tabs.Root>
+    </aside>
   </div>
 
   {#if previewOpened}
@@ -620,7 +697,7 @@
     height: 100%;
     min-height: 0;
     display: grid;
-    grid-template-columns: 3.75rem minmax(0, 1fr);
+    grid-template-columns: 3.75rem minmax(0, 1fr) minmax(17rem, 20rem);
     gap: 0.65rem;
   }
 
@@ -656,7 +733,7 @@
     min-width: 0;
     min-height: 0;
     display: grid;
-    grid-template-rows: auto minmax(12rem, 1fr) auto auto;
+    grid-template-rows: auto minmax(12rem, 1fr) auto;
     border: 1px solid var(--border);
     border-radius: var(--radius-xl);
     overflow: hidden;
@@ -717,20 +794,70 @@
     display: block;
   }
 
-  .selection-toolbar {
-    min-height: 2.9rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.25rem;
-    padding: 0.4rem 0.65rem;
-    border-top: 1px solid var(--border);
-    overflow-x: auto;
+  .inspector-panel {
+    min-width: 0;
+    min-height: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    animation: studio-enter 580ms 80ms cubic-bezier(.2,.8,.2,1) both;
   }
 
-  .selection-toolbar.is-empty { min-height: 2.4rem; }
-  .selection-count { margin-right: 0.4rem; font-size: 0.72rem; font-weight: 620; }
-  .selection-hint { color: var(--muted-foreground); font-size: 0.72rem; }
+  .inspector-tabs { height: 100%; display: grid; grid-template-rows: auto auto minmax(0, 1fr); }
+
+  .inspector-heading {
+    min-height: 3.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 0.9rem 0.55rem;
+  }
+
+  .inspector-heading > div { display: flex; flex-direction: column; gap: 0.1rem; }
+  .inspector-heading strong { font-size: 0.92rem; font-weight: 650; }
+  .inspector-heading > :global(svg) { width: 1rem; color: var(--muted-foreground); }
+  .inspector-kicker { color: var(--muted-foreground); font: 600 0.55rem/1.2 var(--font-mono); letter-spacing: 0.14em; text-transform: uppercase; }
+  .inspector-tab-list { width: calc(100% - 1.4rem); margin: 0 0.7rem 0.5rem; }
+  .selection-badge { min-width: 1rem; height: 1rem; display: inline-grid; place-items: center; border-radius: 999px; background: var(--primary); color: var(--primary-foreground); font: 600 0.55rem/1 var(--font-mono); }
+  .inspector-scroll { min-height: 0; }
+  .inspector-content { display: flex; flex-direction: column; gap: 0.7rem; padding: 0.4rem 0.75rem 1rem; }
+
+  .inspector-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding: 0.7rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: color-mix(in oklch, var(--muted) 45%, transparent);
+  }
+
+  .section-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.4rem; font-size: 0.72rem; font-weight: 650; }
+  .property-row, .property-action { min-height: 2rem; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; color: var(--muted-foreground); font-size: 0.7rem; }
+  .property-row strong { max-width: 55%; color: var(--foreground); font: 520 0.66rem/1.2 var(--font-mono); text-align: right; }
+  .property-action { width: 100%; border: 0; background: transparent; text-align: left; }
+  .property-action:hover { color: var(--foreground); }
+  .active-value { color: var(--success); }
+
+  .inspector-editor-trigger {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin-top: 0.5rem;
+    padding-top: 0.55rem;
+    border-top: 1px solid var(--border);
+    color: var(--foreground);
+    font-size: 0.72rem;
+    font-weight: 600;
+  }
+
+  .selection-actions { display: flex; flex-direction: column; gap: 0.65rem; padding-bottom: 0.7rem; border-bottom: 1px solid var(--border); }
+  .selection-actions > div:first-child { display: flex; align-items: baseline; gap: 0.35rem; }
+  .selection-actions > div:first-child strong { font: 650 1.35rem/1 var(--font-mono); }
+  .selection-actions > div:first-child span { color: var(--muted-foreground); font-size: 0.7rem; }
+  .selection-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; }
+  .inspector-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 0.3rem; padding-top: 0.2rem; }
+  .inspector-empty { min-height: 15rem; border: 0; color: var(--muted-foreground); }
 
   .canvas-status {
     display: flex;
@@ -750,6 +877,8 @@
   }
 
   @media (max-width: 900px) {
+    .editor-workspace { grid-template-columns: 3.75rem minmax(0, 1fr); }
+    .inspector-panel { display: none; }
     .canvas-toolbar { grid-template-columns: 1fr auto; }
     .history-actions { display: none; }
   }
