@@ -6,7 +6,7 @@
   import { ExportedLabelTemplateSchema, type ExportedLabelTemplate } from "$/types";
   import { LocalStoragePersistence } from "$/utils/persistence";
   import { Toasts } from "$/utils/toasts";
-  import Dropdown from "bootstrap/js/dist/dropdown";
+  import { closeDropdown } from "$/utils/dropdown_controller";
   import { FileUtils } from "$/utils/file_utils";
   import * as fabric from "fabric";
   import { Utils } from "@mmote/niimbluelib";
@@ -126,7 +126,7 @@
     }
 
     onLoadRequested(label);
-    new Dropdown(dropdownRef).hide();
+    closeDropdown(dropdownRef);
   };
 
   const onImportClicked = async () => {
@@ -153,7 +153,7 @@
         title = label.title;
       }
 
-      new Dropdown(dropdownRef).hide();
+      closeDropdown(dropdownRef);
     } catch (e) {
       Toasts.zodErrors(e, "Canvas load error:");
     }
@@ -202,7 +202,7 @@
 </script>
 
 <div class="dropdown">
-  <button class="btn btn-sm btn-secondary" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+  <button class="btn btn-sm btn-secondary" data-dropdown-toggle data-dropdown-auto-close="outside">
     <MdIcon icon="sd_storage" />
   </button>
   <div class="saved-labels dropdown-menu" bind:this={dropdownRef}>
@@ -233,7 +233,7 @@
             type="button"
             aria-label="dropdown"
             class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
-            data-bs-toggle="dropdown">
+            data-dropdown-toggle>
           </button>
           <ul class="dropdown-menu">
             <li>

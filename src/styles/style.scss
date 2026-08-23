@@ -1,35 +1,140 @@
-@import "bootstrap/scss/bootstrap-utilities";
-@import "bootstrap/scss/reboot";
-@import "bootstrap/scss/type";
-@import "bootstrap/scss/containers";
-@import "bootstrap/scss/grid";
-@import "bootstrap/scss/buttons";
-@import "bootstrap/scss/button-group";
-@import "bootstrap/scss/forms";
-@import "bootstrap/scss/dropdown";
-@import "bootstrap/scss/modal";
-@import "bootstrap/scss/close";
-@import "bootstrap/scss/progress";
-@import "bootstrap/scss/alert";
-@import "bootstrap/scss/transitions";
 @import "font";
 
-body {
-  font-family: "Noto Sans Variable", sans-serif;
-}
-
 .toastify.toast-danger {
-  background: var(--bs-danger-bg-subtle);
-  border: 1px solid var(--bs-danger-border-subtle);
-  color: var(--bs-danger-text-emphasis);
+  background: color-mix(in oklch, var(--destructive) 24%, var(--popover));
+  border: 1px solid var(--destructive);
+  color: var(--foreground);
 }
 
 .toastify.toast-info {
-  background: var(--bs-success-bg-subtle);
-  border: 1px solid var(--bs-success-border-subtle);
-  color: var(--bs-success-text-emphasis);
+  background: color-mix(in oklch, var(--success) 20%, var(--popover));
+  border: 1px solid var(--success);
+  color: var(--foreground);
 }
 
 .cursor-help {
   cursor: help;
+}
+
+/* Compact compatibility layer for the Fabric editor's dense property controls. */
+.btn {
+  display: inline-flex;
+  min-height: 2rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  border: 1px solid transparent;
+  border-radius: 0.45rem;
+  padding: 0.35rem 0.65rem;
+  color: var(--foreground);
+  background: transparent;
+  font: inherit;
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease;
+
+  &:hover { background: var(--accent); }
+  &:disabled { cursor: not-allowed; opacity: 0.5; }
+}
+
+.btn-sm, .btn-group-sm > .btn { min-height: 1.75rem; padding: 0.25rem 0.5rem; font-size: 0.8rem; }
+.btn-primary { background: var(--primary); color: var(--primary-foreground); }
+.btn-secondary { background: var(--secondary); border-color: var(--border); color: var(--secondary-foreground); }
+.btn-danger { background: var(--destructive); color: white; }
+.btn-outline-secondary, .btn-outline-info { border-color: var(--border); background: transparent; }
+.btn-outline-info { color: var(--info); }
+.btn-light { background: var(--foreground); color: var(--background); }
+.btn-group { display: inline-flex; vertical-align: middle; }
+.btn-group > .btn:not(:first-child) { margin-inline-start: -1px; border-start-start-radius: 0; border-end-start-radius: 0; }
+.btn-group > .btn:not(:last-child) { border-start-end-radius: 0; border-end-end-radius: 0; }
+
+.dropdown { position: relative; display: inline-block; }
+.dropdown-menu {
+  position: absolute;
+  inset-block-start: calc(100% + 0.35rem);
+  inset-inline-start: 0;
+  z-index: 80;
+  display: none;
+  min-width: 10rem;
+  max-width: min(32rem, calc(100vw - 1.5rem));
+  max-height: min(34rem, calc(100vh - 6rem));
+  overflow: auto;
+  margin: 0;
+  padding: 0.35rem;
+  list-style: none;
+  color: var(--popover-foreground);
+  background: var(--popover);
+  border: 1px solid var(--border);
+  border-radius: 0.65rem;
+  box-shadow: 0 18px 50px rgb(0 0 0 / 0.42);
+}
+.dropdown-menu.show { display: block; }
+.dropdown-menu .dropdown-menu { inset-block-start: 100%; inset-inline-start: auto; inset-inline-end: 0; }
+.dropdown-item { display: flex; width: 100%; align-items: center; gap: 0.4rem; border: 0; border-radius: 0.35rem; padding: 0.4rem 0.55rem; color: inherit; background: transparent; text-align: start; cursor: pointer; }
+.dropdown-item:hover, .dropdown-item:focus-visible { background: var(--accent); }
+.dropdown-header { margin: 0; padding: 0.45rem 0.55rem; color: var(--muted-foreground); font-size: 0.75rem; }
+.dropdown-divider { height: 1px; margin: 0.35rem 0; border: 0; background: var(--border); }
+.dropdown-toggle::after { content: ""; margin-inline-start: 0.35rem; border: 0.28em solid transparent; border-block-start-color: currentColor; transform: translateY(0.15em); }
+.dropdown-toggle-split::after { margin-inline-start: 0; }
+
+.form-control, .form-select {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 2rem;
+  border: 1px solid var(--input);
+  border-radius: 0.45rem;
+  padding: 0.35rem 0.55rem;
+  color: var(--foreground);
+  background: color-mix(in oklch, var(--background) 68%, transparent);
+}
+.form-select { padding-inline-end: 1.6rem; }
+.form-control-sm, .form-select-sm { min-height: 1.75rem; padding: 0.25rem 0.45rem; font-size: 0.8rem; }
+.form-range { width: 100%; accent-color: var(--primary); }
+.input-group { display: flex; width: 100%; align-items: stretch; }
+.input-group > * { border-radius: 0; }
+.input-group > :first-child { border-start-start-radius: 0.45rem; border-end-start-radius: 0.45rem; }
+.input-group > :last-child { border-start-end-radius: 0.45rem; border-end-end-radius: 0.45rem; }
+.input-group-text { display: inline-flex; align-items: center; border: 1px solid var(--input); padding: 0.35rem 0.55rem; color: var(--muted-foreground); background: var(--muted); white-space: nowrap; }
+.input-group-sm > * { min-height: 1.75rem; font-size: 0.8rem; }
+.form-check { display: flex; min-height: 1.5rem; align-items: center; gap: 0.45rem; }
+.form-check-input { accent-color: var(--primary); }
+.form-check-label { cursor: pointer; }
+.btn-check { position: absolute; opacity: 0; pointer-events: none; }
+.btn-check:checked + .btn { border-color: var(--primary); background: color-mix(in oklch, var(--primary) 22%, var(--secondary)); color: var(--foreground); }
+
+.alert { border: 1px solid var(--border); border-radius: 0.55rem; padding: 0.65rem; }
+.alert-danger { border-color: color-mix(in oklch, var(--destructive) 70%, var(--border)); background: color-mix(in oklch, var(--destructive) 16%, transparent); }
+.progress { display: flex; height: 0.55rem; overflow: hidden; border-radius: 999px; background: var(--muted); }
+.progress-bar { background: var(--primary); }
+
+.d-flex { display: flex; }
+.flex-nowrap { flex-wrap: nowrap; }
+.flex-wrap { flex-wrap: wrap; }
+.align-items-center { align-items: center; }
+.justify-content-center { justify-content: center; }
+.justify-content-end { justify-content: flex-end; }
+.gap-1 { gap: 0.25rem; }
+.w-100 { width: 100%; }
+.w-25 { width: 25%; }
+.text-end { text-align: end; }
+.text-wrap { white-space: normal; }
+.text-secondary, .text-body-secondary { color: var(--muted-foreground); }
+.text-primary-emphasis { color: var(--primary); }
+.text-danger-emphasis { color: var(--destructive); }
+.text-success { color: var(--success); }
+.text-warning { color: var(--warning); }
+.fs-5 { font-size: 1.15rem; }
+.p-0 { padding: 0; } .p-1 { padding: 0.25rem; } .p-2 { padding: 0.5rem; } .p-3 { padding: 1rem; }
+.px-1 { padding-inline: 0.25rem; } .px-2 { padding-inline: 0.5rem; } .px-3 { padding-inline: 1rem; }
+.py-0 { padding-block: 0; } .py-1 { padding-block: 0.25rem; }
+.pt-1 { padding-block-start: 0.25rem; } .pt-3 { padding-block-start: 1rem; } .pb-2 { padding-block-end: 0.5rem; }
+.mb-1 { margin-block-end: 0.25rem; } .mb-2 { margin-block-end: 0.5rem; } .mb-3 { margin-block-end: 1rem; }
+.mt-1 { margin-block-start: 0.25rem; } .mt-3 { margin-block-start: 1rem; }
+.my-1 { margin-block: 0.25rem; } .my-3 { margin-block: 1rem; }
+.me-1 { margin-inline-end: 0.25rem; }
+
+@media (prefers-reduced-motion: reduce) {
+  .btn { transition: none; }
 }

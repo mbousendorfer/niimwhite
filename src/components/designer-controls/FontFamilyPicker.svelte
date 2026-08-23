@@ -69,7 +69,7 @@
     oninput={(e) => valueUpdated(e.currentTarget.value)} />
 
   <!-- svelte-ignore a11y_consider_explicit_label -->
-  <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"></button>
+  <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-dropdown-toggle></button>
 
   <div class="dropdown-menu">
     <div class="px-3 py-1">

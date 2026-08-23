@@ -1,5 +1,4 @@
 <script lang="ts">
-  import Dropdown from "bootstrap/js/dist/dropdown";
   import * as fabric from "fabric";
   import { onDestroy, onMount, tick } from "svelte";
   import { ArUcoMarker } from "$/fabric-object/aruco";
@@ -63,6 +62,7 @@
   import * as Tabs from "$/components/ui/tabs/index.js";
   import * as Sheet from "$/components/ui/sheet/index.js";
   import * as AlertDialog from "$/components/ui/alert-dialog/index.js";
+  import { closeDropdowns } from "$/utils/dropdown_controller";
 
   let htmlCanvas: HTMLCanvasElement;
 
@@ -381,8 +381,7 @@
 
     // force close dropdowns on touch devices
     fabricCanvas.on("mouse:down", (): void => {
-      const dropdowns = document.querySelectorAll("[data-bs-toggle='dropdown']");
-      dropdowns.forEach((el) => new Dropdown(el).hide());
+      closeDropdowns();
     });
 
     fabricCanvas.on("object:moving", (e): void => {

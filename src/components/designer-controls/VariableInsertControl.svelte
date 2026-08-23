@@ -32,7 +32,7 @@
 </script>
 
 <div class="btn-group btn-group-sm" role="group" title={$tr("params.variables.insert")}>
-  <button class="btn btn-sm btn-secondary dropdown-toggle" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+  <button class="btn btn-sm btn-secondary dropdown-toggle" data-dropdown-toggle data-dropdown-auto-close="outside">
     <MdIcon icon="data_object" />
   </button>
 

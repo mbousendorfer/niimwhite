@@ -99,7 +99,7 @@
   <button
     class="btn btn-sm btn-secondary dropdown-toggle"
     type="button"
-    data-bs-toggle="dropdown"
+    data-dropdown-toggle
     title={$tr("params.generic.position")}>
     <MdIcon icon="control_camera" />
   </button>

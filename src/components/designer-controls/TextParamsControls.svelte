@@ -128,7 +128,7 @@
   class="btn btn-sm {selectedText.textAlign === 'right' ? 'btn-secondary' : ''}"
   onclick={() => setXAlign("right")}><MdIcon icon="format_align_right" /></button>
 <div class="dropdown">
-  <button class="btn btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" title={$tr("params.text.vorigin")}>
+  <button class="btn btn-sm dropdown-toggle" type="button" data-dropdown-toggle title={$tr("params.text.vorigin")}>
     {#if selectedText.originY === "top"}
       <MdIcon icon="vertical_align_top" />
     {:else if selectedText.originY === "center"}
@@ -174,7 +174,7 @@
 </button>
 
 <div class="dropdown">
-  <button class="btn btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" title={$tr("params.color")}>
+  <button class="btn btn-sm dropdown-toggle" type="button" data-dropdown-toggle title={$tr("params.color")}>
     <MdIcon icon="format_color_fill" />
   </button>
 
@@ -206,7 +206,7 @@
 
 {#if selectedText instanceof fabric.Textbox}
   <div class="dropdown">
-    <button class="btn btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" title={$tr("params.params.text.split")}>
+    <button class="btn btn-sm dropdown-toggle" type="button" data-dropdown-toggle title={$tr("params.params.text.split")}>
       <MdIcon icon="wrap_text" />
     </button>
 
