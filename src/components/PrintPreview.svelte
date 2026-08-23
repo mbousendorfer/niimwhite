@@ -23,7 +23,18 @@
   import { Toasts } from "$/utils/toasts";
   import { CustomCanvas } from "$/fabric-object/custom_canvas";
   import { FileUtils } from "$/utils/file_utils";
-  import AppModal from "$/components/basic/AppModal.svelte";
+  import AlertCircleIcon from "@lucide/svelte/icons/alert-circle";
+  import ChevronLeftIcon from "@lucide/svelte/icons/chevron-left";
+  import ChevronRightIcon from "@lucide/svelte/icons/chevron-right";
+  import FlipHorizontal2Icon from "@lucide/svelte/icons/flip-horizontal-2";
+  import InvertIcon from "@lucide/svelte/icons/contrast";
+  import PrinterIcon from "@lucide/svelte/icons/printer";
+  import SlidersHorizontalIcon from "@lucide/svelte/icons/sliders-horizontal";
+  import * as Alert from "$/components/ui/alert/index.js";
+  import { Button } from "$/components/ui/button/index.js";
+  import * as Dialog from "$/components/ui/dialog/index.js";
+  import { Progress } from "$/components/ui/progress/index.js";
+  import { Separator } from "$/components/ui/separator/index.js";
 
   interface Props {
     labelProps: LabelProps;
@@ -64,8 +75,6 @@
   let currentPrintTask: AbstractPrintTask | undefined;
 
   let savedProps = $state<PreviewProps>({});
-
-  let modalRef: AppModal;
 
   const disconnected = derived(connectionState, ($connectionState) => $connectionState !== "connected");
 
@@ -169,7 +178,7 @@
     $printerClient.startHeartbeat();
 
     if (printNow && !error) {
-      modalRef.hide();
+      show = false;
     }
   };
 
@@ -391,44 +400,65 @@
   });
 </script>
 
-<AppModal title={$tr("preview.title")} onClose={onModalClose} bind:show bind:this={modalRef}>
-  <div class="d-flex justify-content-center">
-    {#if pagesTotal > 1}
-      <button disabled={printState !== "idle"} class="btn w-100 fs-1" onclick={pageDown}>
-        <MdIcon icon="chevron_left" />
-      </button>
-    {/if}
-
-    <canvas class="print-start-{labelProps.printDirection}" bind:this={previewCanvas}></canvas>
-
-    {#if pagesTotal > 1}
-      <button disabled={printState !== "idle"} class="btn w-100 fs-1" onclick={pageUp}>
-        <MdIcon icon="chevron_right" />
-      </button>
-    {/if}
-  </div>
-
-  <div class="text-center">
-    {#if pagesTotal > 1}<div>Page {page + 1} / {pagesTotal}</div>{/if}
-
-    {#if printState === "sending"}
-      <div>Sending...</div>
-    {/if}
-    {#if printState === "printing"}
-      <div>
-        Printing...
-        <div class="progress" role="progressbar">
-          <div class="progress-bar" style="width: {printProgress}%">{printProgress}%</div>
+<Dialog.Root bind:open={show} onOpenChange={(open) => { if (!open) onModalClose(); }}>
+  <Dialog.Content class="print-dialog" showCloseButton={printState === "idle"}>
+    <Dialog.Header class="print-dialog-header">
+      <div class="dialog-title-row">
+        <div class="dialog-icon"><SlidersHorizontalIcon /></div>
+        <div>
+          <Dialog.Title>{$tr("preview.title")}</Dialog.Title>
+          <Dialog.Description>{$tr("preview.description")}</Dialog.Description>
         </div>
       </div>
-    {/if}
+    </Dialog.Header>
 
-    {#if error}
-      <div class="alert alert-danger" role="alert">{error}</div>
-    {/if}
-  </div>
+    <div class="preview-layout">
+      <section class="preview-stage studio-grid">
+        <div class="preview-canvas-row">
+          {#if pagesTotal > 1}
+            <Button disabled={printState !== "idle"} variant="ghost" size="icon" onclick={pageDown} aria-label={$tr("preview.previous_page")}>
+              <ChevronLeftIcon />
+            </Button>
+          {/if}
 
-  {#snippet footer()}
+          <div class="preview-paper">
+            <canvas class="print-start-{labelProps.printDirection}" bind:this={previewCanvas}></canvas>
+          </div>
+
+          {#if pagesTotal > 1}
+            <Button disabled={printState !== "idle"} variant="ghost" size="icon" onclick={pageUp} aria-label={$tr("preview.next_page")}>
+              <ChevronRightIcon />
+            </Button>
+          {/if}
+        </div>
+
+        <div class="preview-meta">
+          <span class="metric">{labelProps.size.width} × {labelProps.size.height} PX</span>
+          {#if pagesTotal > 1}<span class="page-count">{page + 1} / {pagesTotal}</span>{/if}
+        </div>
+
+        {#if printState !== "idle"}
+          <div class="print-status" aria-live="polite">
+            <div><span>{printState === "sending" ? $tr("preview.sending") : $tr("preview.printing")}</span><strong>{printProgress}%</strong></div>
+            <Progress value={printProgress} />
+          </div>
+        {/if}
+
+        {#if error}
+          <Alert.Root variant="destructive">
+            <AlertCircleIcon />
+            <Alert.Title>{$tr("preview.error")}</Alert.Title>
+            <Alert.Description>{error}</Alert.Description>
+          </Alert.Root>
+        {/if}
+      </section>
+
+      <aside class="preview-settings">
+        <div class="settings-heading">
+          <span>{$tr("preview.settings")}</span>
+          <span class="metric">{$tr("preview.live")}</span>
+        </div>
+        <Separator />
     <div class="input-group input-group-sm">
       <span class="input-group-text">{$tr("preview.postprocess")}</span>
 
@@ -452,23 +482,27 @@
         savedValue={savedProps.postProcess}
         onClick={toggleSavedProp} />
 
-      <button
-        class="btn btn-sm {postProcessInvert ? 'btn-secondary' : 'btn-outline-secondary'}"
+      <Button
+        variant={postProcessInvert ? "secondary" : "outline"}
+        size="icon-sm"
+        aria-label={$tr("preview.invert")}
         onclick={() => {
           postProcessInvert = !postProcessInvert;
           updatePreview();
         }}>
-        <MdIcon icon="invert_colors" />
-      </button>
+        <InvertIcon />
+      </Button>
 
-      <button
-        class="btn btn-sm {postProcessMirror ? 'btn-secondary' : 'btn-outline-secondary'}"
+      <Button
+        variant={postProcessMirror ? "secondary" : "outline"}
+        size="icon-sm"
+        aria-label={$tr("preview.mirror")}
         onclick={() => {
           postProcessMirror = !postProcessMirror;
           updatePreview();
         }}>
-        <MdIcon icon="flip" />
-      </button>
+        <FlipHorizontal2Icon />
+      </Button>
     </div>
 
     {#if !(postProcessType && ["bayer2", "bayer4", "bayer8"].includes(postProcessType))}
@@ -635,51 +669,85 @@
       <ParamLockButton propName="offset" value={offset} savedValue={savedProps.offset} onClick={toggleSavedProp} />
     </div>
 
-    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{$tr("preview.close")}</button>
+    <Separator class="my-1" />
+    <div class="preview-actions">
+      <Button type="button" variant="ghost" onclick={() => (show = false)}>{$tr("preview.close")}</Button>
 
     {#if printState !== "idle"}
-      <button type="button" class="btn btn-primary" disabled={$disconnected} onclick={endPrint}>
+      <Button type="button" variant="destructive" disabled={$disconnected} onclick={endPrint}>
         {$tr("preview.print.cancel")}
-      </button>
+      </Button>
     {/if}
 
-    <button
+    <Button
       type="button"
-      class="btn btn-secondary"
+      variant="outline"
+      size="icon"
       title={$tr("preview.print.system")}
+      aria-label={$tr("preview.print.system")}
       onclick={onPrintOnSystemPrinter}>
-      <MdIcon icon="print" />
-    </button>
+      <PrinterIcon />
+    </Button>
 
-    <button type="button" class="btn btn-primary" disabled={$disconnected || printState !== "idle"} onclick={onPrint}>
+    <Button type="button" disabled={$disconnected || printState !== "idle"} onclick={onPrint}>
       {#if $disconnected}
         {$tr("preview.not_connected")}
       {:else}
-        <MdIcon icon="print" /> {$tr("preview.print")}
+        <PrinterIcon data-icon="inline-start" /> {$tr("preview.print")}
       {/if}
-    </button>
-  {/snippet}
-</AppModal>
+    </Button>
+    </div>
+      </aside>
+    </div>
+  </Dialog.Content>
+</Dialog.Root>
 
 <style>
+  :global(.print-dialog) {
+    width: min(96vw, 76rem);
+    max-width: min(96vw, 76rem) !important;
+    height: min(90dvh, 52rem);
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 0;
+    padding: 0;
+    overflow: hidden;
+    background: color-mix(in oklch, var(--popover) 96%, transparent);
+    box-shadow: 0 2rem 7rem rgb(0 0 0 / 0.55);
+  }
+
+  :global(.print-dialog-header) { padding: 1rem 1.1rem 0.85rem; border-bottom: 1px solid var(--border); }
+  .dialog-title-row { display: flex; align-items: center; gap: 0.7rem; }
+  .dialog-icon { width: 2rem; height: 2rem; display: grid; place-items: center; border-radius: var(--radius-md); background: color-mix(in oklch, var(--primary) 15%, transparent); color: var(--primary); }
+  .dialog-icon :global(svg) { width: 1rem; }
+  .preview-layout { min-width: 0; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 22rem; }
+  .preview-stage { min-width: 0; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; padding: clamp(1rem, 4vw, 3rem); overflow: auto; background-color: color-mix(in oklch, var(--background) 78%, black); }
+  .preview-canvas-row { width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.75rem; }
+  .preview-paper { max-width: 100%; max-height: 62vh; overflow: auto; border-radius: 0.3rem; background: var(--paper); box-shadow: 0 2rem 5rem rgb(0 0 0 / 0.48); }
   canvas {
     image-rendering: pixelated;
-    border: 1px solid #6d6d6d;
+    display: block;
+    border: 1px solid color-mix(in oklch, var(--paper-foreground) 18%, transparent);
     max-width: 100%;
   }
-  canvas.print-start-left {
-    border-left: 2px solid #ff4646;
-  }
-  canvas.print-start-top {
-    border-top: 2px solid #ff4646;
-  }
-  .progress-bar {
-    transition: none;
-  }
-  .input-group .form-range {
-    flex-grow: 1;
-    width: 1%;
-    height: unset;
-    padding: 0 1rem;
+  canvas.print-start-left { border-left: 3px solid var(--primary); }
+  canvas.print-start-top { border-top: 3px solid var(--primary); }
+  .preview-meta { display: flex; align-items: center; gap: 0.75rem; }
+  .page-count { min-width: 2.5rem; padding: 0.2rem 0.45rem; border-radius: 999px; background: var(--muted); font: 600 0.65rem/1 var(--font-mono); text-align: center; }
+  .print-status { width: min(100%, 28rem); display: flex; flex-direction: column; gap: 0.45rem; }
+  .print-status > div { display: flex; justify-content: space-between; font-size: 0.72rem; }
+  .print-status strong { font-family: var(--font-mono); }
+  .preview-settings { min-width: 0; min-height: 0; display: flex; flex-direction: column; gap: 0.55rem; padding: 0.85rem; border-left: 1px solid var(--border); overflow-y: auto; }
+  .settings-heading { display: flex; align-items: center; justify-content: space-between; padding: 0.15rem 0.15rem 0.3rem; font-size: 0.74rem; font-weight: 680; }
+  .preview-actions { position: sticky; bottom: -0.85rem; display: flex; align-items: center; justify-content: flex-end; gap: 0.35rem; margin: auto -0.85rem -0.85rem; padding: 0.7rem 0.85rem; border-top: 1px solid var(--border); background: color-mix(in oklch, var(--popover) 94%, transparent); backdrop-filter: blur(14px); }
+  .preview-settings :global(.input-group) { display: flex; min-width: 0; align-items: center; gap: 0.25rem; padding: 0.35rem; border: 1px solid var(--border); border-radius: var(--radius-md); background: color-mix(in oklch, var(--muted) 42%, transparent); }
+  .preview-settings :global(.input-group-text) { flex: none; border: 0; padding: 0 0.3rem; background: transparent; color: var(--muted-foreground); font-size: 0.66rem; }
+  .preview-settings :global(.form-control), .preview-settings :global(.form-select) { min-width: 0; height: 1.9rem; flex: 1; border: 1px solid var(--input); border-radius: var(--radius-sm); padding: 0 0.45rem; background: var(--background); color: var(--foreground); font-size: 0.68rem; }
+  .preview-settings :global(.form-range) { min-width: 3rem; flex: 1; accent-color: var(--primary); }
+
+  @media (max-width: 820px) {
+    :global(.print-dialog) { height: min(94dvh, 58rem); }
+    .preview-layout { grid-template-columns: 1fr; overflow-y: auto; }
+    .preview-stage { min-height: 19rem; }
+    .preview-settings { overflow: visible; border-top: 1px solid var(--border); border-left: 0; }
   }
 </style>
