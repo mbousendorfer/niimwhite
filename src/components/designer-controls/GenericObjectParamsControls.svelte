@@ -45,11 +45,11 @@
 </script>
 
 <input type="hidden" value={editRevision} />
-<section class="inspector-control-section">
-  <header class="inspector-control-heading">
+<details class="inspector-control-section" open>
+  <summary class="inspector-control-heading">
     <div><strong>{$tr("inspector.transform")}</strong><span>{$tr("inspector.transform.help")}</span></div>
     <MdIcon icon="open_with" />
-  </header>
+  </summary>
   <ObjectPositionControls {selectedObject} />
   <div class="inspector-subgroup">
     <div class="inspector-subgroup-title">{$tr("inspector.alignment")}</div>
@@ -90,4 +90,4 @@
       </div>
     </div>
   {/if}
-</section>
+</details>

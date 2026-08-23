@@ -1103,7 +1103,7 @@
   .inspector-content {
     display: flex;
     flex-direction: column;
-    gap: 0.7rem;
+    gap: 0.5rem;
     padding: 0.4rem 0.75rem 1rem;
   }
 
@@ -1169,8 +1169,8 @@
   .selection-actions {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
-    padding: 0.25rem 0 0.85rem;
+    gap: 0.55rem;
+    padding: 0.15rem 0 0.65rem;
     border-bottom: 1px solid var(--border);
   }
   .selection-summary {
@@ -1224,7 +1224,7 @@
   .inspector-controls {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 0.5rem;
     padding-top: 0.1rem;
   }
   .inspector-empty {

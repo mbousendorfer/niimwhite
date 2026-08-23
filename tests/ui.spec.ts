@@ -34,9 +34,11 @@ test("edits a text object through the structured property inspector", async ({ p
   await content.fill("Shipping 24");
   await expect(content).toHaveValue("Shipping 24");
 
+  await inspector.locator("summary").filter({ hasText: "Typography" }).click();
   const fontSize = inspector.getByRole("spinbutton", { name: /Font size/ });
   await fontSize.fill("32");
   await expect(fontSize).toHaveValue("32");
+  await inspector.locator("summary").filter({ hasText: "Insert variable" }).click();
   await expect(inspector.getByRole("button", { name: /Date \{dt\|YYYY-MM-DD\}/ })).toBeVisible();
 });
 

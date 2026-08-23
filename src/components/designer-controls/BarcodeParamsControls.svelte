@@ -11,11 +11,11 @@
 </script>
 
 <input type="hidden" value={editRevision} />
-<section class="inspector-control-section">
-  <header class="inspector-control-heading">
+<details class="inspector-control-section" open>
+  <summary class="inspector-control-heading">
     <div><strong>{$tr("inspector.barcode")}</strong><span>{$tr("inspector.code.help")}</span></div>
     <MdIcon icon="view_week" />
-  </header>
+  </summary>
   <label class="inspector-field"
     ><span>{$tr("params.barcode.content")}</span><textarea
       rows="4"
@@ -66,4 +66,4 @@
         selectedBarcode.set("printText", !selectedBarcode.printText);
         valueUpdated();
       }} /></label>
-</section>
+</details>

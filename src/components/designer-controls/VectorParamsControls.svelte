@@ -25,11 +25,11 @@
 
 <input type="hidden" value={editRevision} />
 {#if selectedObject instanceof fabric.Rect || selectedObject instanceof fabric.Circle || selectedObject instanceof fabric.Line || selectedObject instanceof fabric.Polyline}
-  <section class="inspector-control-section">
-    <header class="inspector-control-heading">
+  <details class="inspector-control-section">
+    <summary class="inspector-control-heading">
       <div><strong>{$tr("inspector.appearance")}</strong><span>{$tr("inspector.appearance.help")}</span></div>
       <MdIcon icon="palette" />
-    </header>
+    </summary>
     <div class="inspector-field-grid {selectedObject instanceof fabric.Rect ? 'inspector-field-grid-2' : ''}">
       {#if selectedObject instanceof fabric.Rect}
         <label class="inspector-field"
@@ -63,5 +63,5 @@
           ><option value="black">{$tr("params.color.black")}</option></select
         ></label>
     {/if}
-  </section>
+  </details>
 {/if}

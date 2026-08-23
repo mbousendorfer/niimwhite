@@ -20,11 +20,11 @@
   };
 </script>
 
-<section class="inspector-control-section inspector-control-section-accent">
-  <header class="inspector-control-heading">
+<details class="inspector-control-section inspector-control-section-accent">
+  <summary class="inspector-control-heading">
     <div><strong>{$tr("params.variables.insert")}</strong><span>{$tr("inspector.variables.help")}</span></div>
     <MdIcon icon="data_object" />
-  </header>
+  </summary>
   <div class="inspector-variable-grid">
     <button onclick={() => insertDateTime()}
       ><MdIcon icon="event" /><span>{$tr("params.variables.insert.datetime")}</span><code>{"{dt}"}</code></button>
@@ -35,4 +35,4 @@
       ><MdIcon icon="schedule" /><span>{$tr("params.variables.insert.time")}</span><code>{"{dt|HH:mm:ss}"}</code
       ></button>
   </div>
-</section>
+</details>

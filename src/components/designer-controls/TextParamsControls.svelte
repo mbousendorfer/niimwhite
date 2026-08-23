@@ -61,11 +61,11 @@
 
 <input type="hidden" value={editRevision} />
 
-<section class="inspector-control-section">
-  <header class="inspector-control-heading">
+<details class="inspector-control-section" open>
+  <summary class="inspector-control-heading">
     <div><strong>{$tr("inspector.content")}</strong><span>{$tr("inspector.content.help")}</span></div>
     <MdIcon icon="edit_note" />
-  </header>
+  </summary>
   <label class="inspector-field"
     ><span>{$tr("inspector.text")}</span><textarea
       rows="3"
@@ -75,13 +75,13 @@
         valueUpdated();
       }}></textarea
     ></label>
-</section>
+</details>
 
-<section class="inspector-control-section">
-  <header class="inspector-control-heading">
+<details class="inspector-control-section">
+  <summary class="inspector-control-heading">
     <div><strong>{$tr("inspector.appearance")}</strong><span>{$tr("inspector.appearance.help")}</span></div>
     <MdIcon icon="palette" />
-  </header>
+  </summary>
   <div class="inspector-field-grid inspector-field-grid-2">
     <label class="inspector-field"
       ><span>{$tr("inspector.text_color")}</span><select
@@ -100,13 +100,13 @@
         ><option value="black">{$tr("params.color.black")}</option></select
       ></label>
   </div>
-</section>
+</details>
 
-<section class="inspector-control-section">
-  <header class="inspector-control-heading">
+<details class="inspector-control-section">
+  <summary class="inspector-control-heading">
     <div><strong>{$tr("inspector.typography")}</strong><span>{$tr("inspector.typography.help")}</span></div>
     <MdIcon icon="text_fields" />
-  </header>
+  </summary>
   <FontFamilyPicker
     {editRevision}
     value={selectedText.fontFamily}
@@ -203,4 +203,4 @@
         checked={selectedText.fontAutoSize}
         onchange={toggleFontAutoSize} /></label>
   {/if}
-</section>
+</details>

@@ -17,11 +17,11 @@
 </script>
 
 <input type="hidden" value={editRevision} />
-<section class="inspector-control-section">
-  <header class="inspector-control-heading">
+<details class="inspector-control-section" open>
+  <summary class="inspector-control-heading">
     <div><strong>{$tr("inspector.aruco")}</strong><span>{$tr("inspector.aruco.help")}</span></div>
     <MdIcon icon="grid_on" />
-  </header>
+  </summary>
   <label class="inspector-field"
     ><span>{$tr("params.aruco.dict")}</span><select
       value={selectedArUco.dictionary}
@@ -46,4 +46,4 @@
           valueUpdated();
         }
       }} /></label>
-</section>
+</details>

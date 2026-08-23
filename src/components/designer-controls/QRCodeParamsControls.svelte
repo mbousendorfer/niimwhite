@@ -11,11 +11,11 @@
 </script>
 
 <input type="hidden" value={editRevision} />
-<section class="inspector-control-section">
-  <header class="inspector-control-heading">
+<details class="inspector-control-section" open>
+  <summary class="inspector-control-heading">
     <div><strong>{$tr("inspector.qrcode")}</strong><span>{$tr("inspector.code.help")}</span></div>
     <MdIcon icon="qr_code_2" />
-  </header>
+  </summary>
   <label class="inspector-field"
     ><span>{$tr("inspector.content")}</span><textarea
       rows="4"
@@ -60,4 +60,4 @@
           >{i + 1}</option
         >{/each}</select
     ></label>
-</section>
+</details>
