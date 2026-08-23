@@ -5,7 +5,6 @@
   import LoaderCircleIcon from "@lucide/svelte/icons/loader-circle";
   import PowerIcon from "@lucide/svelte/icons/power";
   import PowerOffIcon from "@lucide/svelte/icons/power-off";
-  import Settings2Icon from "@lucide/svelte/icons/settings-2";
   import UsbIcon from "@lucide/svelte/icons/usb";
   import type { MaterialIcon } from "material-icons";
   import { onMount } from "svelte";
